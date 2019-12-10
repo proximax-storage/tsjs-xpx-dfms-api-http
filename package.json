@@ -1,0 +1,43 @@
+{
+  "name": "tsjs-xpx-dfms-api-http",
+  "version": "0.0.1",
+  "description": "tsjs client implementation for ProximaX DFMS",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "rm -rf ./dist && tsc",
+    "test": "mocha --ui bdd --require ts-node/register './test/**/*.spec.*' --timeout 90000",
+    "test:e2e": "npm run build && mocha --ui bdd --require ts-node/register './e2e/**/*.spec.*' --timeout 300000",
+    "test:all": "mocha --ui bdd --require ts-node/register './test/**/*.spec.*' './e2e/**/*.spec.*' --timeout 300000"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/proximax-storage/tsjs-xpx-dfms-api-http.git"
+  },
+  "keywords": [
+    "ProximaX",
+    "dfms",
+    "http",
+    "api",
+    "contract",
+    "drive"
+  ],
+  "author": "ProximaX",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/proximax-storage/tsjs-xpx-dfms-api-http/issues"
+  },
+  "homepage": "https://github.com/proximax-storage/tsjs-xpx-dfms-api-http#readme",
+  "devDependencies": {
+    "@types/chai": "^4.2.6",
+    "@types/mocha": "^5.2.7",
+    "@types/node": "^12.12.16",
+    "chai": "^4.2.0",
+    "mocha": "^6.2.2",
+    "request": "^2.88.0",
+    "ts-node": "^8.5.4",
+    "typescript": "^3.7.3"
+  },
+  "dependencies": {
+    "rxjs": "^6.5.3"
+  }
+}
