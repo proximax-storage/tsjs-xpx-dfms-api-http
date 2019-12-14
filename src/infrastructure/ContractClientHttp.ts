@@ -1,7 +1,8 @@
 import { from as observableFrom, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ContractClientApi } from "./api/apis";
-import { Contract } from './model/models';
+import { ContractDTO } from './model/models';
+import { Contract } from '../model/Contract';
 
 export class ContractClientHttp {
     /**
@@ -19,10 +20,10 @@ export class ContractClientHttp {
     }
 
     public ls(options?: any): Observable<Contract[]> {
-        return observableFrom(this.contractRoutesApi.ls(options).then(response => response.body));
+        return observableFrom(this.contractRoutesApi.ls(options).then(response => response.body.map(dto => Contract.fromDTO(dto))));
     }
 
     public getContract(drive: string, options?: any): Observable<Contract> {
-        return observableFrom(this.contractRoutesApi.getContract(drive, options).then(response => response.body));
+        return observableFrom(this.contractRoutesApi.getContract(drive, options).then(response => Contract.fromDTO(response.body)));
     }
 }

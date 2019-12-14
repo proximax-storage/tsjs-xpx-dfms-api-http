@@ -1,14 +1,14 @@
-export * from './contract';
-export * from './error';
+export * from './contractDTO';
+export * from './errorDTO';
 export * from './inlineResponse200';
-export * from './stat';
+export * from './statDTO';
 
 import localVarRequest = require('request');
 
-import { Contract } from './contract';
-import { Error } from './error';
+import { ContractDTO } from './contractDTO';
+import { ErrorDTO } from './errorDTO';
 import { InlineResponse200 } from './inlineResponse200';
-import { Stat } from './stat';
+import { StatDTO } from './statDTO';
 
 /* tslint:disable:no-unused-variable */
 let primitives = [
@@ -23,16 +23,16 @@ let primitives = [
                  ];
 
 let enumsMap: {[index: string]: any} = {
-        "Error.CodeEnum": Error.CodeEnum,
-        "Error.TypeEnum": Error.TypeEnum,
-        "Stat.TypeEnum": Stat.TypeEnum,
+        "ErrorDTO.CodeEnum": ErrorDTO.CodeEnum,
+        "ErrorDTO.TypeEnum": ErrorDTO.TypeEnum,
+        "StatDTO.TypeEnum": StatDTO.TypeEnum,
 }
 
 let typeMap: {[index: string]: any} = {
-    "Contract": Contract,
-    "Error": Error,
+    "ContractDTO": ContractDTO,
+    "ErrorDTO": ErrorDTO,
     "InlineResponse200": InlineResponse200,
-    "Stat": Stat,
+    "StatDTO": StatDTO,
 }
 
 export class ObjectSerializer {

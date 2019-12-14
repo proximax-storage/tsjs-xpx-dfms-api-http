@@ -14,7 +14,8 @@ import localVarRequest = require('request');
 import http = require('http');
 
 /* tslint:disable:no-unused-locals */
-import { Contract } from '../model/contract';
+import { ContractDTO } from '../model/contractDTO';
+import { ErrorDTO } from '../model/errorDTO';
 
 import { ObjectSerializer, Authentication, VoidAuth, Interceptor } from '../model/models';
 
@@ -80,9 +81,9 @@ export class ContractClientApi {
     /**
      * Creates subscription for Drive Contract updates/corrections of any contract from the network by ID.
      * @summary Ammendments subscriptio
-     * @param arg [Cid](https://github.com/multiformats/cid) (version 1) - special content identifier. May represents either data or Drive.
+     * @param arg1 [Cid](https://github.com/multiformats/cid) (version 1) - special content identifier. May represents either data or Drive.
      */
-    public async ammends (arg: string, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: Array<Contract>;  }> {
+    public async ammends (arg1: string, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: Array<ContractDTO>;  }> {
         const localVarPath = this.basePath + '/contract/ammends';
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this.defaultHeaders);
@@ -95,13 +96,13 @@ export class ContractClientApi {
         }
         let localVarFormParams: any = {};
 
-        // verify required parameter 'arg' is not null or undefined
-        if (arg === null || arg === undefined) {
-            throw new Error('Required parameter arg was null or undefined when calling ammends.');
+        // verify required parameter 'arg1' is not null or undefined
+        if (arg1 === null || arg1 === undefined) {
+            throw new Error('Required parameter arg1 was null or undefined when calling ammends.');
         }
 
-        if (arg !== undefined) {
-            localVarQueryParameters['arg'] = ObjectSerializer.serialize(arg, "string");
+        if (arg1 !== undefined) {
+            localVarQueryParameters['arg'] = ObjectSerializer.serialize(arg1, "string");
         }
 
         (<any>Object).assign(localVarHeaderParams, options.headers);
@@ -115,6 +116,7 @@ export class ContractClientApi {
             uri: localVarPath,
             useQuerystring: this._useQuerystring,
             json: true,
+            qsStringifyOptions: {arrayFormat: 'repeat'}
         };
 
         let authenticationPromise = Promise.resolve();
@@ -133,12 +135,12 @@ export class ContractClientApi {
                     localVarRequestOptions.form = localVarFormParams;
                 }
             }
-            return new Promise<{ response: http.IncomingMessage; body: Array<Contract>;  }>((resolve, reject) => {
+            return new Promise<{ response: http.IncomingMessage; body: Array<ContractDTO>;  }>((resolve, reject) => {
                 localVarRequest(localVarRequestOptions, (error, response, body) => {
                     if (error) {
                         reject(error);
                     } else {
-                        body = ObjectSerializer.deserialize(body, "Array<Contract>");
+                        body = ObjectSerializer.deserialize(body, "Array<ContractDTO>");
                         if (response.statusCode && response.statusCode >= 200 && response.statusCode <= 299) {
                             resolve({ response: response, body: body });
                         } else {
@@ -150,7 +152,7 @@ export class ContractClientApi {
         });
     }
     /**
-     * Compose synchronously announces invites to the Network with current node as an  owner and tries to find members which agrees on specified parameters and options. It does not guarantee success on resolving members. On success persists contract locally and gives ability to use DriveFS.
+     * Compose synchronously announces invites to the Network with current node as an owner and tries to find members which agrees on specified parameters and options. It does not guarantee success on resolving members. On success persists contract locally and gives ability to use DriveFS.
      * @summary Creates new Drive contract
      * @param arg1 Total Drive space in MB. NOTE - Actual parameter name is \&#39;arg\&#39;
      * @param arg2 Total Drive duration in blocks. Avg block time - 15 seconds. NOTE - Actual parameter name is \&#39;arg\&#39;
@@ -160,7 +162,7 @@ export class ContractClientApi {
      * @param billingPeriod Period of time after which replicators receieve payment. Defaults to 172800 ~ 1 month. Example - if duration is one year and billing period is one month, then replicators will receive payouts 12 times every month.
      * @param percentApprovers Amount of replicators needed in percents to approve Drive Contract multisignature transactions. Defaults to 66.
      */
-    public async compose (arg1: number, arg2: number, replicas?: number, minReplicas?: number, billingPrice?: number, billingPeriod?: number, percentApprovers?: number, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: Contract;  }> {
+    public async compose (arg1: number, arg2: number, replicas?: number, minReplicas?: number, billingPrice?: number, billingPeriod?: number, percentApprovers?: number, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: ContractDTO;  }> {
         const localVarPath = this.basePath + '/contract/compose';
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this.defaultHeaders);
@@ -183,12 +185,8 @@ export class ContractClientApi {
             throw new Error('Required parameter arg2 was null or undefined when calling compose.');
         }
 
-        if (arg1 !== undefined) {
-            localVarQueryParameters['arg1'] = ObjectSerializer.serialize(arg1, "number");
-        }
-
-        if (arg2 !== undefined) {
-            localVarQueryParameters['arg2'] = ObjectSerializer.serialize(arg2, "number");
+        if (arg1 !== undefined && arg2 !== undefined) {
+            localVarQueryParameters['arg'] =  [ObjectSerializer.serialize(arg1, "number"), ObjectSerializer.serialize(arg2, "number")];
         }
 
         if (replicas !== undefined) {
@@ -222,6 +220,7 @@ export class ContractClientApi {
             uri: localVarPath,
             useQuerystring: this._useQuerystring,
             json: true,
+            qsStringifyOptions: {arrayFormat: 'repeat'}
         };
 
         let authenticationPromise = Promise.resolve();
@@ -240,12 +239,12 @@ export class ContractClientApi {
                     localVarRequestOptions.form = localVarFormParams;
                 }
             }
-            return new Promise<{ response: http.IncomingMessage; body: Contract;  }>((resolve, reject) => {
+            return new Promise<{ response: http.IncomingMessage; body: ContractDTO;  }>((resolve, reject) => {
                 localVarRequest(localVarRequestOptions, (error, response, body) => {
                     if (error) {
                         reject(error);
                     } else {
-                        body = ObjectSerializer.deserialize(body, "Contract");
+                        body = ObjectSerializer.deserialize(body, "ContractDTO");
                         if (response.statusCode && response.statusCode >= 200 && response.statusCode <= 299) {
                             resolve({ response: response, body: body });
                         } else {
@@ -259,9 +258,9 @@ export class ContractClientApi {
     /**
      * Searches for Drive Contract information over the network.
      * @summary Get Drive contract infromation
-     * @param arg [Cid](https://github.com/multiformats/cid) (version 1) - special content identifier. May represents either data or Drive.
+     * @param arg1 [Cid](https://github.com/multiformats/cid) (version 1) - special content identifier. May represents either data or Drive.
      */
-    public async getContract (arg: string, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: Contract;  }> {
+    public async getContract (arg1: string, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: ContractDTO;  }> {
         const localVarPath = this.basePath + '/contract/get';
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this.defaultHeaders);
@@ -274,13 +273,13 @@ export class ContractClientApi {
         }
         let localVarFormParams: any = {};
 
-        // verify required parameter 'arg' is not null or undefined
-        if (arg === null || arg === undefined) {
-            throw new Error('Required parameter arg was null or undefined when calling getContract.');
+        // verify required parameter 'arg1' is not null or undefined
+        if (arg1 === null || arg1 === undefined) {
+            throw new Error('Required parameter arg1 was null or undefined when calling getContract.');
         }
 
-        if (arg !== undefined) {
-            localVarQueryParameters['arg'] = ObjectSerializer.serialize(arg, "string");
+        if (arg1 !== undefined) {
+            localVarQueryParameters['arg'] = ObjectSerializer.serialize(arg1, "string");
         }
 
         (<any>Object).assign(localVarHeaderParams, options.headers);
@@ -294,6 +293,7 @@ export class ContractClientApi {
             uri: localVarPath,
             useQuerystring: this._useQuerystring,
             json: true,
+            qsStringifyOptions: {arrayFormat: 'repeat'}
         };
 
         let authenticationPromise = Promise.resolve();
@@ -312,12 +312,12 @@ export class ContractClientApi {
                     localVarRequestOptions.form = localVarFormParams;
                 }
             }
-            return new Promise<{ response: http.IncomingMessage; body: Contract;  }>((resolve, reject) => {
+            return new Promise<{ response: http.IncomingMessage; body: ContractDTO;  }>((resolve, reject) => {
                 localVarRequest(localVarRequestOptions, (error, response, body) => {
                     if (error) {
                         reject(error);
                     } else {
-                        body = ObjectSerializer.deserialize(body.Contract, "Contract");
+                        body = ObjectSerializer.deserialize(body.Contract, "ContractDTO");
                         if (response.statusCode && response.statusCode >= 200 && response.statusCode <= 299) {
                             resolve({ response: response, body: body });
                         } else {
@@ -332,7 +332,7 @@ export class ContractClientApi {
      * Lists all the contracts in which Node participates as an owner or a member
      * @summary List Drive contracts node aware of
      */
-    public async ls (options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: Array<Contract>;  }> {
+    public async ls (options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: Array<ContractDTO>;  }> {
         const localVarPath = this.basePath + '/contract/ls';
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this.defaultHeaders);
@@ -356,6 +356,7 @@ export class ContractClientApi {
             uri: localVarPath,
             useQuerystring: this._useQuerystring,
             json: true,
+            qsStringifyOptions: {arrayFormat: 'repeat'}
         };
 
         let authenticationPromise = Promise.resolve();
@@ -374,12 +375,12 @@ export class ContractClientApi {
                     localVarRequestOptions.form = localVarFormParams;
                 }
             }
-            return new Promise<{ response: http.IncomingMessage; body: Array<Contract>;  }>((resolve, reject) => {
+            return new Promise<{ response: http.IncomingMessage; body: Array<ContractDTO>;  }>((resolve, reject) => {
                 localVarRequest(localVarRequestOptions, (error, response, body) => {
                     if (error) {
                         reject(error);
                     } else {
-                        body = ObjectSerializer.deserialize(body.Ids.map(id=> { return {drive: id} }), "Array<Contract>");
+                        body = ObjectSerializer.deserialize(body.Ids.map(id => { return {drive: id}}), "Array<ContractDTO>");
                         if (response.statusCode && response.statusCode >= 200 && response.statusCode <= 299) {
                             resolve({ response: response, body: body });
                         } else {

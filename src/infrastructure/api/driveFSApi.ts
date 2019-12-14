@@ -14,8 +14,9 @@ import localVarRequest = require('request');
 import http = require('http');
 
 /* tslint:disable:no-unused-locals */
+import { ErrorDTO } from '../model/errorDTO';
 import { InlineResponse200 } from '../model/inlineResponse200';
-import { Stat } from '../model/stat';
+import { StatDTO } from '../model/statDTO';
 
 import { ObjectSerializer, Authentication, VoidAuth, Interceptor } from '../model/models';
 
@@ -81,10 +82,11 @@ export class DriveFSApi {
     /**
      * Sends file or directory to remote node which adds it to the path of the contract
      * @summary Add file
-     * @param arg The destination path.
+     * @param arg1 [Cid](https://github.com/multiformats/cid) (version 1) - special content identifier. May represents either data or Drive.
+     * @param arg3 The destination path.
      * @param flush To immediately send data to replicators
      */
-    public async driveAdd (arg: string, flush?: boolean, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: InlineResponse200;  }> {
+    public async driveAdd (arg1: string, arg3: string, flush?: boolean, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: InlineResponse200;  }> {
         const localVarPath = this.basePath + '/drive/add';
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this.defaultHeaders);
@@ -95,15 +97,20 @@ export class DriveFSApi {
         } else {
             localVarHeaderParams.Accept = produces.join(',');
         }
-        let localVarFormParams: any = {};
+        let localVarFormParams: any = (options as any).formData;
 
-        // verify required parameter 'arg' is not null or undefined
-        if (arg === null || arg === undefined) {
-            throw new Error('Required parameter arg was null or undefined when calling driveAdd.');
+        // verify required parameter 'arg1' is not null or undefined
+        if (arg1 === null || arg1 === undefined) {
+            throw new Error('Required parameter arg1 was null or undefined when calling driveAdd.');
         }
 
-        if (arg !== undefined) {
-            localVarQueryParameters['arg'] = ObjectSerializer.serialize(arg, "string");
+        // verify required parameter 'arg3' is not null or undefined
+        if (arg3 === null || arg3 === undefined) {
+            throw new Error('Required parameter arg3 was null or undefined when calling driveAdd.');
+        }
+
+        if (arg1 !== undefined && arg3 !== undefined) {
+            localVarQueryParameters['arg'] =  [ObjectSerializer.serialize(arg1, "string"), ObjectSerializer.serialize(arg3, "string")];
         }
 
         if (flush !== undefined) {
@@ -112,7 +119,7 @@ export class DriveFSApi {
 
         (<any>Object).assign(localVarHeaderParams, options.headers);
 
-        let localVarUseFormData = false;
+        let localVarUseFormData = true;
 
         let localVarRequestOptions: localVarRequest.Options = {
             method: 'POST',
@@ -121,6 +128,7 @@ export class DriveFSApi {
             uri: localVarPath,
             useQuerystring: this._useQuerystring,
             json: true,
+            qsStringifyOptions: {arrayFormat: 'repeat'}
         };
 
         let authenticationPromise = Promise.resolve();
@@ -158,10 +166,12 @@ export class DriveFSApi {
     /**
      * Copy copies file or directory from the givens source path to the given destination path It does not makes the full copy of the file or directory, it just copies the reference
      * @summary Copy file
-     * @param arg The destination path.
+     * @param arg1 [Cid](https://github.com/multiformats/cid) (version 1) - special content identifier. May represents either data or Drive.
+     * @param arg2 The source path of the file in Drive.
+     * @param arg3 The destination path.
      * @param flush To immediately send data to replicators
      */
-    public async driveCp (arg: string, flush?: boolean, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body?: any;  }> {
+    public async driveCp (arg1: string, arg2: string, arg3: string, flush?: boolean, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body?: any;  }> {
         const localVarPath = this.basePath + '/drive/cp';
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this.defaultHeaders);
@@ -174,13 +184,23 @@ export class DriveFSApi {
         }
         let localVarFormParams: any = {};
 
-        // verify required parameter 'arg' is not null or undefined
-        if (arg === null || arg === undefined) {
-            throw new Error('Required parameter arg was null or undefined when calling driveCp.');
+        // verify required parameter 'arg1' is not null or undefined
+        if (arg1 === null || arg1 === undefined) {
+            throw new Error('Required parameter arg1 was null or undefined when calling driveCp.');
         }
 
-        if (arg !== undefined) {
-            localVarQueryParameters['arg'] = ObjectSerializer.serialize(arg, "string");
+        // verify required parameter 'arg2' is not null or undefined
+        if (arg2 === null || arg2 === undefined) {
+            throw new Error('Required parameter arg2 was null or undefined when calling driveCp.');
+        }
+
+        // verify required parameter 'arg3' is not null or undefined
+        if (arg3 === null || arg3 === undefined) {
+            throw new Error('Required parameter arg3 was null or undefined when calling driveCp.');
+        }
+
+        if (arg1 !== undefined && arg2 !== undefined && arg3 !== undefined) {
+            localVarQueryParameters['arg'] =  [ObjectSerializer.serialize(arg1, "string"), ObjectSerializer.serialize(arg2, "string"), ObjectSerializer.serialize(arg3, "string")];
         }
 
         if (flush !== undefined) {
@@ -198,6 +218,7 @@ export class DriveFSApi {
             uri: localVarPath,
             useQuerystring: this._useQuerystring,
             json: true,
+            qsStringifyOptions: {arrayFormat: 'repeat'}
         };
 
         let authenticationPromise = Promise.resolve();
@@ -234,9 +255,9 @@ export class DriveFSApi {
     /**
      * Flush pushes state of the local Drive to all replicators
      * @summary Flush drive
-     * @param arg [Cid](https://github.com/multiformats/cid) (version 1) - special content identifier. May represents either data or Drive.
+     * @param arg1 [Cid](https://github.com/multiformats/cid) (version 1) - special content identifier. May represents either data or Drive.
      */
-    public async driveFlush (arg: string, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body?: any;  }> {
+    public async driveFlush (arg1: string, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body?: any;  }> {
         const localVarPath = this.basePath + '/drive/flush';
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this.defaultHeaders);
@@ -249,13 +270,13 @@ export class DriveFSApi {
         }
         let localVarFormParams: any = {};
 
-        // verify required parameter 'arg' is not null or undefined
-        if (arg === null || arg === undefined) {
-            throw new Error('Required parameter arg was null or undefined when calling driveFlush.');
+        // verify required parameter 'arg1' is not null or undefined
+        if (arg1 === null || arg1 === undefined) {
+            throw new Error('Required parameter arg1 was null or undefined when calling driveFlush.');
         }
 
-        if (arg !== undefined) {
-            localVarQueryParameters['arg'] = ObjectSerializer.serialize(arg, "string");
+        if (arg1 !== undefined) {
+            localVarQueryParameters['arg'] = ObjectSerializer.serialize(arg1, "string");
         }
 
         (<any>Object).assign(localVarHeaderParams, options.headers);
@@ -269,6 +290,7 @@ export class DriveFSApi {
             uri: localVarPath,
             useQuerystring: this._useQuerystring,
             json: true,
+            qsStringifyOptions: {arrayFormat: 'repeat'}
         };
 
         let authenticationPromise = Promise.resolve();
@@ -305,10 +327,11 @@ export class DriveFSApi {
     /**
      * Sends file or directory to remote node which adds it to the path of the contract
      * @summary Get file
-     * @param arg The source path of the file in Drive.
+     * @param arg1 [Cid](https://github.com/multiformats/cid) (version 1) - special content identifier. May represents either data or Drive.
+     * @param arg2 The source path of the file in Drive.
      * @param flush To immediately send data to replicators
      */
-    public async driveGet (arg: string, flush?: boolean, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: string;  }> {
+    public async driveGet (arg1: string, arg2: string, flush?: boolean, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: string;  }> {
         const localVarPath = this.basePath + '/drive/get';
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this.defaultHeaders);
@@ -321,13 +344,18 @@ export class DriveFSApi {
         }
         let localVarFormParams: any = {};
 
-        // verify required parameter 'arg' is not null or undefined
-        if (arg === null || arg === undefined) {
-            throw new Error('Required parameter arg was null or undefined when calling driveGet.');
+        // verify required parameter 'arg1' is not null or undefined
+        if (arg1 === null || arg1 === undefined) {
+            throw new Error('Required parameter arg1 was null or undefined when calling driveGet.');
         }
 
-        if (arg !== undefined) {
-            localVarQueryParameters['arg'] = ObjectSerializer.serialize(arg, "string");
+        // verify required parameter 'arg2' is not null or undefined
+        if (arg2 === null || arg2 === undefined) {
+            throw new Error('Required parameter arg2 was null or undefined when calling driveGet.');
+        }
+
+        if (arg1 !== undefined && arg2 !== undefined) {
+            localVarQueryParameters['arg'] =  [ObjectSerializer.serialize(arg1, "string"), ObjectSerializer.serialize(arg2, "string")];
         }
 
         if (flush !== undefined) {
@@ -345,6 +373,7 @@ export class DriveFSApi {
             uri: localVarPath,
             useQuerystring: this._useQuerystring,
             json: true,
+            qsStringifyOptions: {arrayFormat: 'repeat'}
         };
 
         let authenticationPromise = Promise.resolve();
@@ -382,9 +411,10 @@ export class DriveFSApi {
     /**
      * Ls returns information about the files and directories under the given path
      * @summary List files
-     * @param arg The source path of the file in Drive.
+     * @param arg1 [Cid](https://github.com/multiformats/cid) (version 1) - special content identifier. May represents either data or Drive.
+     * @param arg2 The source path of the file in Drive.
      */
-    public async driveLs (arg: string, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: Array<Stat>;  }> {
+    public async driveLs (arg1: string, arg2: string, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: Array<StatDTO>;  }> {
         const localVarPath = this.basePath + '/drive/ls';
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this.defaultHeaders);
@@ -397,13 +427,18 @@ export class DriveFSApi {
         }
         let localVarFormParams: any = {};
 
-        // verify required parameter 'arg' is not null or undefined
-        if (arg === null || arg === undefined) {
-            throw new Error('Required parameter arg was null or undefined when calling driveLs.');
+        // verify required parameter 'arg1' is not null or undefined
+        if (arg1 === null || arg1 === undefined) {
+            throw new Error('Required parameter arg1 was null or undefined when calling driveLs.');
         }
 
-        if (arg !== undefined) {
-            localVarQueryParameters['arg'] = ObjectSerializer.serialize(arg, "string");
+        // verify required parameter 'arg2' is not null or undefined
+        if (arg2 === null || arg2 === undefined) {
+            throw new Error('Required parameter arg2 was null or undefined when calling driveLs.');
+        }
+
+        if (arg1 !== undefined && arg2 !== undefined) {
+            localVarQueryParameters['arg'] =  [ObjectSerializer.serialize(arg1, "string"), ObjectSerializer.serialize(arg2, "string")];
         }
 
         (<any>Object).assign(localVarHeaderParams, options.headers);
@@ -417,6 +452,7 @@ export class DriveFSApi {
             uri: localVarPath,
             useQuerystring: this._useQuerystring,
             json: true,
+            qsStringifyOptions: {arrayFormat: 'repeat'}
         };
 
         let authenticationPromise = Promise.resolve();
@@ -435,12 +471,12 @@ export class DriveFSApi {
                     localVarRequestOptions.form = localVarFormParams;
                 }
             }
-            return new Promise<{ response: http.IncomingMessage; body: Array<Stat>;  }>((resolve, reject) => {
+            return new Promise<{ response: http.IncomingMessage; body: Array<StatDTO>;  }>((resolve, reject) => {
                 localVarRequest(localVarRequestOptions, (error, response, body) => {
                     if (error) {
                         reject(error);
                     } else {
-                        body = ObjectSerializer.deserialize(body, "Array<Stat>");
+                        body = ObjectSerializer.deserialize(body.List, "Array<StatDTO>");
                         if (response.statusCode && response.statusCode >= 200 && response.statusCode <= 299) {
                             resolve({ response: response, body: body });
                         } else {
@@ -454,10 +490,11 @@ export class DriveFSApi {
     /**
      * MakeDir creates new directory on the given path
      * @summary Make directory
-     * @param arg The source path of the file in Drive.
+     * @param arg1 [Cid](https://github.com/multiformats/cid) (version 1) - special content identifier. May represents either data or Drive.
+     * @param arg2 The source path of the file in Drive.
      * @param flush To immediately send data to replicators
      */
-    public async driveMkdir (arg: string, flush?: boolean, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body?: any;  }> {
+    public async driveMkdir (arg1: string, arg2: string, flush?: boolean, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body?: any;  }> {
         const localVarPath = this.basePath + '/drive/mkdir';
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this.defaultHeaders);
@@ -470,13 +507,18 @@ export class DriveFSApi {
         }
         let localVarFormParams: any = {};
 
-        // verify required parameter 'arg' is not null or undefined
-        if (arg === null || arg === undefined) {
-            throw new Error('Required parameter arg was null or undefined when calling driveMkdir.');
+        // verify required parameter 'arg1' is not null or undefined
+        if (arg1 === null || arg1 === undefined) {
+            throw new Error('Required parameter arg1 was null or undefined when calling driveMkdir.');
         }
 
-        if (arg !== undefined) {
-            localVarQueryParameters['arg'] = ObjectSerializer.serialize(arg, "string");
+        // verify required parameter 'arg2' is not null or undefined
+        if (arg2 === null || arg2 === undefined) {
+            throw new Error('Required parameter arg2 was null or undefined when calling driveMkdir.');
+        }
+
+        if (arg1 !== undefined && arg2 !== undefined) {
+            localVarQueryParameters['arg'] =  [ObjectSerializer.serialize(arg1, "string"), ObjectSerializer.serialize(arg2, "string")];
         }
 
         if (flush !== undefined) {
@@ -494,6 +536,7 @@ export class DriveFSApi {
             uri: localVarPath,
             useQuerystring: this._useQuerystring,
             json: true,
+            qsStringifyOptions: {arrayFormat: 'repeat'}
         };
 
         let authenticationPromise = Promise.resolve();
@@ -530,10 +573,12 @@ export class DriveFSApi {
     /**
      * Move moves file or directory from the givens source path to the given destination path Use also to rename file or directory
      * @summary Move file
-     * @param arg The destination path.
+     * @param arg1 [Cid](https://github.com/multiformats/cid) (version 1) - special content identifier. May represents either data or Drive.
+     * @param arg2 The source path of the file in Drive.
+     * @param arg3 The destination path.
      * @param flush To immediately send data to replicators
      */
-    public async driveMv (arg: string, flush?: boolean, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body?: any;  }> {
+    public async driveMv (arg1: string, arg2: string, arg3: string, flush?: boolean, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body?: any;  }> {
         const localVarPath = this.basePath + '/drive/mv';
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this.defaultHeaders);
@@ -546,13 +591,23 @@ export class DriveFSApi {
         }
         let localVarFormParams: any = {};
 
-        // verify required parameter 'arg' is not null or undefined
-        if (arg === null || arg === undefined) {
-            throw new Error('Required parameter arg was null or undefined when calling driveMv.');
+        // verify required parameter 'arg1' is not null or undefined
+        if (arg1 === null || arg1 === undefined) {
+            throw new Error('Required parameter arg1 was null or undefined when calling driveMv.');
         }
 
-        if (arg !== undefined) {
-            localVarQueryParameters['arg'] = ObjectSerializer.serialize(arg, "string");
+        // verify required parameter 'arg2' is not null or undefined
+        if (arg2 === null || arg2 === undefined) {
+            throw new Error('Required parameter arg2 was null or undefined when calling driveMv.');
+        }
+
+        // verify required parameter 'arg3' is not null or undefined
+        if (arg3 === null || arg3 === undefined) {
+            throw new Error('Required parameter arg3 was null or undefined when calling driveMv.');
+        }
+
+        if (arg1 !== undefined && arg2 !== undefined && arg3 !== undefined) {
+            localVarQueryParameters['arg'] =  [ObjectSerializer.serialize(arg1, "string"), ObjectSerializer.serialize(arg2, "string"), ObjectSerializer.serialize(arg3, "string")];
         }
 
         if (flush !== undefined) {
@@ -570,6 +625,7 @@ export class DriveFSApi {
             uri: localVarPath,
             useQuerystring: this._useQuerystring,
             json: true,
+            qsStringifyOptions: {arrayFormat: 'repeat'}
         };
 
         let authenticationPromise = Promise.resolve();
@@ -606,11 +662,12 @@ export class DriveFSApi {
     /**
      * Remove removes the file or directory from the path
      * @summary Remove file
-     * @param arg The source path of the file in Drive.
+     * @param arg1 [Cid](https://github.com/multiformats/cid) (version 1) - special content identifier. May represents either data or Drive.
+     * @param arg2 The source path of the file in Drive.
      * @param flush To immediately send data to replicators
      * @param local Delete file from local disk only, but keep reference on it remotely
      */
-    public async driveRm (arg: string, flush?: boolean, local?: boolean, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body?: any;  }> {
+    public async driveRm (arg1: string, arg2: string, flush?: boolean, local?: boolean, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body?: any;  }> {
         const localVarPath = this.basePath + '/drive/rm';
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this.defaultHeaders);
@@ -623,13 +680,18 @@ export class DriveFSApi {
         }
         let localVarFormParams: any = {};
 
-        // verify required parameter 'arg' is not null or undefined
-        if (arg === null || arg === undefined) {
-            throw new Error('Required parameter arg was null or undefined when calling driveRm.');
+        // verify required parameter 'arg1' is not null or undefined
+        if (arg1 === null || arg1 === undefined) {
+            throw new Error('Required parameter arg1 was null or undefined when calling driveRm.');
         }
 
-        if (arg !== undefined) {
-            localVarQueryParameters['arg'] = ObjectSerializer.serialize(arg, "string");
+        // verify required parameter 'arg2' is not null or undefined
+        if (arg2 === null || arg2 === undefined) {
+            throw new Error('Required parameter arg2 was null or undefined when calling driveRm.');
+        }
+
+        if (arg1 !== undefined && arg2 !== undefined) {
+            localVarQueryParameters['arg'] =  [ObjectSerializer.serialize(arg1, "string"), ObjectSerializer.serialize(arg2, "string")];
         }
 
         if (flush !== undefined) {
@@ -651,6 +713,7 @@ export class DriveFSApi {
             uri: localVarPath,
             useQuerystring: this._useQuerystring,
             json: true,
+            qsStringifyOptions: {arrayFormat: 'repeat'}
         };
 
         let authenticationPromise = Promise.resolve();
@@ -687,9 +750,10 @@ export class DriveFSApi {
     /**
      * Stat returns information about the file or directory under the given path
      * @summary File information
-     * @param arg The source path of the file in Drive.
+     * @param arg1 [Cid](https://github.com/multiformats/cid) (version 1) - special content identifier. May represents either data or Drive.
+     * @param arg2 The source path of the file in Drive.
      */
-    public async driveStat (arg: string, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: Stat;  }> {
+    public async driveStat (arg1: string, arg2: string, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: StatDTO;  }> {
         const localVarPath = this.basePath + '/drive/stat';
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this.defaultHeaders);
@@ -702,13 +766,18 @@ export class DriveFSApi {
         }
         let localVarFormParams: any = {};
 
-        // verify required parameter 'arg' is not null or undefined
-        if (arg === null || arg === undefined) {
-            throw new Error('Required parameter arg was null or undefined when calling driveStat.');
+        // verify required parameter 'arg1' is not null or undefined
+        if (arg1 === null || arg1 === undefined) {
+            throw new Error('Required parameter arg1 was null or undefined when calling driveStat.');
         }
 
-        if (arg !== undefined) {
-            localVarQueryParameters['arg'] = ObjectSerializer.serialize(arg, "string");
+        // verify required parameter 'arg2' is not null or undefined
+        if (arg2 === null || arg2 === undefined) {
+            throw new Error('Required parameter arg2 was null or undefined when calling driveStat.');
+        }
+
+        if (arg1 !== undefined && arg2 !== undefined) {
+            localVarQueryParameters['arg'] =  [ObjectSerializer.serialize(arg1, "string"), ObjectSerializer.serialize(arg2, "string")];
         }
 
         (<any>Object).assign(localVarHeaderParams, options.headers);
@@ -722,6 +791,7 @@ export class DriveFSApi {
             uri: localVarPath,
             useQuerystring: this._useQuerystring,
             json: true,
+            qsStringifyOptions: {arrayFormat: 'repeat'}
         };
 
         let authenticationPromise = Promise.resolve();
@@ -740,12 +810,12 @@ export class DriveFSApi {
                     localVarRequestOptions.form = localVarFormParams;
                 }
             }
-            return new Promise<{ response: http.IncomingMessage; body: Stat;  }>((resolve, reject) => {
+            return new Promise<{ response: http.IncomingMessage; body: StatDTO;  }>((resolve, reject) => {
                 localVarRequest(localVarRequestOptions, (error, response, body) => {
                     if (error) {
                         reject(error);
                     } else {
-                        body = ObjectSerializer.deserialize(body, "Stat");
+                        body = ObjectSerializer.deserialize(body.Stat, "StatDTO");
                         if (response.statusCode && response.statusCode >= 200 && response.statusCode <= 299) {
                             resolve({ response: response, body: body });
                         } else {

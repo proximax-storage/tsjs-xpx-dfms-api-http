@@ -1,6 +1,6 @@
 /**
  * DFMS API
- * DFMS node HTTP API. [Reference implementation in GO](https://github.com/proximax-storage/go-xpx-dfms-api-http) [API definition](https://github.com/proximax-storage/go-xpx-dfms-api)  API does not tries to follow idiomatic REST or other API patterns for reasons.  
+ * DFMS node HTTP API. [Reference implementation in GO](https://github.com/proximax-storage/go-xpx-dfms-api-http) [API definition](https://github.com/proximax-storage/go-xpx-dfms-api)  API does not tries to follow idiomatic REST or other API patterns for reasons. 
  *
  * The version of the OpenAPI document: 1.0.0
  * 
@@ -11,7 +11,7 @@
  */
 
 
-export class Error {
+export class ErrorDTO {
     /**
     * Error message
     */
@@ -19,8 +19,8 @@ export class Error {
     /**
     * * 0 - Normal - is a normal error. The command failed for some reason that\'s not a bug. * 1 - Client - means the client made an invalid request. * 2 - Implementation - means there\'s a bug in the implementation. * 3 - RateLimited - is returned when the operation has been rate-limited. * 4 - Forbidden - is returned when the client doesn\'t have permission to       perform the requested operation. 
     */
-    'code'?: Error.CodeEnum;
-    'type'?: Error.TypeEnum;
+    'code'?: ErrorDTO.CodeEnum;
+    'type'?: ErrorDTO.TypeEnum;
 
     static discriminator: string | undefined = undefined;
 
@@ -33,20 +33,20 @@ export class Error {
         {
             "name": "code",
             "baseName": "code",
-            "type": "Error.CodeEnum"
+            "type": "ErrorDTO.CodeEnum"
         },
         {
             "name": "type",
             "baseName": "type",
-            "type": "Error.TypeEnum"
+            "type": "ErrorDTO.TypeEnum"
         }    ];
 
     static getAttributeTypeMap() {
-        return Error.attributeTypeMap;
+        return ErrorDTO.attributeTypeMap;
     }
 }
 
-export namespace Error {
+export namespace ErrorDTO {
     export enum CodeEnum {
         NUMBER_0 = <any> 0,
         NUMBER_1 = <any> 1,

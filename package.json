@@ -1,6 +1,6 @@
 {
   "name": "tsjs-xpx-dfms-api-http",
-  "version": "0.0.1",
+  "version": "0.0.1-alpha.1",
   "description": "tsjs client implementation for ProximaX DFMS",
   "main": "dist/index.js",
   "scripts": {
@@ -32,12 +32,15 @@
     "@types/mocha": "^5.2.7",
     "@types/node": "^12.12.16",
     "chai": "^4.2.0",
+    "cids": "^0.7.1",
     "mocha": "^6.2.2",
     "request": "^2.88.0",
+    "tar-stream": "^2.1.0",
     "ts-node": "^8.5.4",
     "typescript": "^3.7.3"
   },
   "dependencies": {
+    "form-data": "^3.0.0",
     "rxjs": "^6.5.3"
   }
 }
