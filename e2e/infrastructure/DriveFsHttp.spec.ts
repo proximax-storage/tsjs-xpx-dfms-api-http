@@ -1,23 +1,26 @@
-import {deepEqual} from 'assert';
-import {assert, expect} from 'chai';
-import {DriveFsHttp} from '../../src/infrastructure/DriveFsHttp';
+import { deepEqual } from 'assert';
+import { assert, expect } from 'chai';
+import { DriveFsHttp } from '../../src/infrastructure/DriveFsHttp';
 import { TypeEnum } from '../../src/model/Stat';
+import { pack as tarpack, extract as tarextract } from 'tar-stream';
 
 const CID = require('cids');
-const tar = require('tar-stream');
 const Readable = require('stream').Readable
+const FormData = require('form-data');
 
 const driveFsHttp = new DriveFsHttp("http://127.0.0.1:6366/api/v1");
 const cid = 'baegbeibondkkrhxfprzwrlgxxltavqhweh2ylhu4hgo5lxjxpqbpfsw2lu';
 
 describe('DriveFsHttp', () => {
     describe('cid', () => {
-        xit('should decode cid', (done) => {
-            const cid = new CID('baegbeibondkkrhxfprzwrlgxxltavqhweh2ylhu4hgo5lxjxpqbpfsw2lu')
+        it('should decode cid', (done) => {
+            const cid = new CID('bafkreigaknpexyvxt76zgkitavbwx6ejgfheup5oybpm77f3pxzrvwpfdi');
             console.log(cid.version); // 1
             console.log(cid.codec);   // 0x0C - unknown; what is it?
             console.log(cid.multibaseName); // 'base32'
+            console.log(cid.multihash);
             console.log(cid.toString());
+            done();
         });
     });
 
@@ -27,14 +30,14 @@ describe('DriveFsHttp', () => {
             driveFsHttp.mkDir(cid, path, false)
                 .subscribe((result) => {
                     done();
-            });
+                });
         });
         it('should create another directory', (done) => {
             const path = 'someRootDir/someDir';
             driveFsHttp.mkDir(cid, path, false)
                 .subscribe((result) => {
                     done();
-            });
+                });
         });
     });
 
@@ -45,7 +48,7 @@ describe('DriveFsHttp', () => {
             driveFsHttp.mv(cid, srcPath, dstPath, false)
                 .subscribe((result) => {
                     done();
-            });
+                });
         });
     });
 
@@ -56,20 +59,7 @@ describe('DriveFsHttp', () => {
             driveFsHttp.cp(cid, srcPath, dstPath, false)
                 .subscribe((result) => {
                     done();
-            });
-        });
-    });
-
-    describe('ls', () => {
-        it('should list a file/directory', (done) => {
-            const path = 'someRootDir';
-            driveFsHttp.ls(cid, path)
-                .subscribe((result) => {
-                    expect(result.length).to.be.equal(2);
-                    expect(result[0].name).to.contain('someDirRenamed');
-                    expect(result[1].name).to.contain('someDirRenamed');
-                    done();
-            });
+                });
         });
     });
 
@@ -82,7 +72,7 @@ describe('DriveFsHttp', () => {
                     expect(result.size).not.to.be.undefined;
                     expect(result.type).to.be.equal(TypeEnum.Dir)
                     done();
-            });
+                });
         });
     });
 
@@ -110,48 +100,133 @@ describe('DriveFsHttp', () => {
                 // Use case: for some types of streams, you'll need to provide "file"-related information manually.
                 // See the `form-data` README for more information about options: https://github.com/form-data/form-data
                 custom_file: {
-                  // value:  fs.createReadStream('/dev/urandom'),
-                  value: data,
-                  options: {
-                    filename: name
-                  }
+                    // value:  fs.createReadStream('/dev/urandom'),
+                    value: data,
+                    options: {
+                        filename: name
+                    }
                 }
-              };
+            };
 
             const options = {
-//                headers: {
-//                    'Content-Type': 'multiparm/form-data'
-//                },
                 formData: formData
             };
 
             driveFsHttp.add(cid, path, false, options)
                 .subscribe((result) => {
                     done();
-            });
+                });
+        });
+
+        it('should add a folder', (done) => {
+            const form = new FormData();
+
+            const path = 'someRootDir/';
+
+            const content0 = '';
+            const name0 = 'folder';
+            const data0 = Buffer.alloc(0);
+
+            const content1 = 'Hello 1st another world!';
+            const name1 = 'newAnotherFile1';
+            const data1 = Buffer.alloc(content1.length, content1);
+
+            const content2 = 'Hello 2nd another world!';
+            const name2 = 'newAnotherFile2';
+            const data2 = Buffer.alloc(content2.length, content2);
+
+            const formData = {
+                files: [
+                    {
+                        value: data0,
+                        options: {
+                            filepath: name0,
+                            contentType: 'application/x-directory'
+                        }
+                    },
+                    {
+                        value: data1,
+                        options: {
+                            filepath: name0 + '/' + name1,
+                            contentType: 'application/octet-stream'
+                        }
+                    }, {
+                        value: data2,
+                        options: {
+                            filepath: name0 + '/' + name2,
+                            contentType: 'application/octet-stream'
+                        }
+                    }
+                ]
+            };
+
+
+            const options = {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                },
+
+                formData: formData
+            };
+
+            driveFsHttp.add(cid, path, false, options)
+                .subscribe((result) => {
+                    done();
+                });
+        });
+    });
+
+    describe('ls', () => {
+        it('should list a file/directory', (done) => {
+            const path = 'someRootDir';
+            driveFsHttp.ls(cid, path)
+                .subscribe((result) => {
+                    console.log("someRootDir:");
+                    result.forEach(s => console.log(" -> " + s.name + " (size: " + s.size + ", type: " + s.type + ")"));
+                    expect(result.length).to.be.equal(4);
+                    const sorted = result.sort((a, b) => (a.name < b.name ? -1 : (a.name > b.name ? 1 : 0)));
+                    expect(sorted[0].name).to.contain('folder');
+                    expect(sorted[1].name).to.contain('newFile');
+                    expect(sorted[2].name).to.contain('someDirRenamed');
+                    expect(sorted[3].name).to.contain('someDirRenamedCopied');
+                    done();
+                });
+        });
+        it('should list a file/directory', (done) => {
+            const path = 'someRootDir/folder';
+            driveFsHttp.ls(cid, path)
+                .subscribe((result) => {
+                    console.log("someRootDir/folder:");
+                    result.forEach(s => console.log(" -> " + s.name + " (size: " + s.size + ", type: " + s.type + ")"));
+                    expect(result.length).to.be.equal(2);
+                    const sorted = result.sort((a, b) => (a.name < b.name ? -1 : (a.name > b.name ? 1 : 0)));
+                    expect(sorted[0].name).to.contain('newAnotherFile1');
+                    expect(sorted[1].name).to.contain('newAnotherFile2');
+                    done();
+                });
         });
     });
 
     describe('get', () => {
         it('should get a file', (done) => {
-            const pack = tar.pack(); // pack is a streams2 stream
-            const extract = tar.extract();
+            const pack = tarpack(); // pack is a streams2 stream
+            const extract = tarextract();
             let fileBody = '';
 
             extract.on('entry', (header, stream, next) => {
-              // header is the tar header
-              // stream is the content body (might be an empty stream)
-              // call next when you are done with this entry
+                // header is the tar header
+                // stream is the content body (might be an empty stream)
+                // call next when you are done with this entry
 
-              stream.on('data', (chunk) => {
-                  fileBody += chunk;
-              });
+                stream.on('data', (chunk) => {
+                    fileBody += chunk;
+                });
 
-              stream.on('end', () => {
-                next(); // ready for next entry
-              });
+                stream.on('end', () => {
+                    next(); // ready for next entry
+                });
 
-              stream.resume(); // just auto drain the stream
+                stream.resume(); // just auto drain the stream
             });
 
             extract.on('finish', () => {
@@ -166,13 +241,13 @@ describe('DriveFsHttp', () => {
             const content = 'Hello world!';
             const name = 'newFile';
 
-            driveFsHttp.get(cid, path +name, false)
+            driveFsHttp.get(cid, path + name, false)
                 .subscribe((result) => {
                     const s = new Readable();
                     s.push(result);    // the string you want
                     s.push(null);      // indicates end-of-file basically - the end of the stream
                     s.pipe(extract);
-            });
+                });
         });
 
     });
@@ -183,7 +258,7 @@ describe('DriveFsHttp', () => {
             driveFsHttp.rm(cid, path, false, false)
                 .subscribe((result) => {
                     done();
-            });
+                });
         });
     });
 });

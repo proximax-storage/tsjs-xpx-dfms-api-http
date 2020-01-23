@@ -31,8 +31,10 @@
     "@types/chai": "^4.2.6",
     "@types/mocha": "^5.2.7",
     "@types/node": "^12.12.16",
+    "@types/tar-stream": "^1.6.1",
     "chai": "^4.2.0",
     "cids": "^0.7.1",
+    "form-data": "^3.0.0",
     "mocha": "^6.2.2",
     "request": "^2.88.0",
     "tar-stream": "^2.1.0",
@@ -40,7 +42,6 @@
     "typescript": "^3.7.3"
   },
   "dependencies": {
-    "form-data": "^3.0.0",
     "rxjs": "^6.5.3"
   }
 }
