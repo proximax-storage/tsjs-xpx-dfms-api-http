@@ -3,6 +3,7 @@ import { assert, expect } from 'chai';
 import { DriveFsHttp } from '../../src/infrastructure/DriveFsHttp';
 import { TypeEnum } from '../../src/model/Stat';
 import { pack as tarpack, extract as tarextract } from 'tar-stream';
+import { createReadStream, createWriteStream } from 'fs';
 
 const CID = require('cids');
 const Readable = require('stream').Readable
@@ -209,7 +210,6 @@ describe('DriveFsHttp', () => {
 
     describe('get', () => {
         it('should get a file', (done) => {
-            const pack = tarpack(); // pack is a streams2 stream
             const extract = tarextract();
             let fileBody = '';
 
@@ -234,11 +234,8 @@ describe('DriveFsHttp', () => {
                 done();
             });
 
-            pack.pipe(extract);
-
             const path = 'someRootDir/';
 
-            const content = 'Hello world!';
             const name = 'newFile';
 
             driveFsHttp.get(cid, path + name, false)
@@ -249,7 +246,56 @@ describe('DriveFsHttp', () => {
                     s.pipe(extract);
                 });
         });
+    });
 
+    describe('get', () => {
+        it.only('should get a file as stream', (done) => {
+            const downloadToFileStream = createWriteStream('/tmp/tempdownload.file');
+            const extract = tarextract();
+
+            extract.on('entry', (header, stream, next) => {
+                // header is the tar header
+                // stream is the content body (might be an empty stream)
+                // call next when you are done with this entry
+
+                stream.on('data', (chunk) => {
+                    // fileBody += chunk;
+                    downloadToFileStream.write(chunk, (error) => {
+                        if (error) {
+                            done('write stream failed')
+                        }
+                    })
+                });
+
+                stream.on('end', () => {
+                    next(); // ready for next entry
+                });
+
+                stream.resume(); // just auto drain the stream
+            });
+
+            extract.on('finish', () => {
+                // expect(fileBody).to.be.equal(content);
+                done();
+            });
+
+            const path = 'someRootDir/';
+
+            const name = 'newFile'; // can be huge
+
+            driveFsHttp.getAsStream(cid, path + name, false)
+                .subscribe((resultAsStream) => {
+                    resultAsStream
+                    .pipe(extract)
+                    .on('error', (error) => {
+                        done(error);
+                    })
+                    .on('finish', () => {
+                        console.log("finished downloading stream");
+                        done();
+                    });
+                });
+        });
     });
 
     describe('rm', () => {

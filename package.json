@@ -42,6 +42,7 @@
     "typescript": "^3.7.3"
   },
   "dependencies": {
+    "request-progress": "^3.0.0",
     "rxjs": "^6.5.3"
   }
 }

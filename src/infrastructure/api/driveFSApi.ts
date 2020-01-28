@@ -21,6 +21,7 @@ import { StatDTO } from '../model/statDTO';
 import { ObjectSerializer, Authentication, VoidAuth, Interceptor } from '../model/models';
 
 import { HttpError, RequestFile } from './apis';
+import { Transform, Readable, PassThrough } from 'stream';
 
 let defaultBasePath = 'https://127.0.0.1/api/v1';
 
@@ -405,6 +406,131 @@ export class DriveFSApi {
                         }
                     }
                 });
+            });
+        });
+    }
+
+    /**
+     * Sends file or directory to remote node which adds it to the path of the contract
+     * @summary Get file
+     * @param arg1 [Cid](https://github.com/multiformats/cid) (version 1) - special content identifier. May represents either data or Drive.
+     * @param arg2 The source path of the file in Drive.
+     * @param flush To immediately send data to replicators
+     */
+    public async driveGetAsStream (arg1: string, arg2: string, flush?: boolean, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: Readable;  }> {
+        const localVarPath = this.basePath + '/drive/get';
+        let localVarQueryParameters: any = {};
+        let localVarHeaderParams: any = (<any>Object).assign({}, this.defaultHeaders);
+        const produces = ['text/plain', 'application/json'];
+        // give precedence to 'application/json'
+        if (produces.indexOf('application/json') >= 0) {
+            localVarHeaderParams.Accept = 'application/json';
+        } else {
+            localVarHeaderParams.Accept = produces.join(',');
+        }
+        let localVarFormParams: any = {};
+
+        // verify required parameter 'arg1' is not null or undefined
+        if (arg1 === null || arg1 === undefined) {
+            throw new Error('Required parameter arg1 was null or undefined when calling driveGet.');
+        }
+
+        // verify required parameter 'arg2' is not null or undefined
+        if (arg2 === null || arg2 === undefined) {
+            throw new Error('Required parameter arg2 was null or undefined when calling driveGet.');
+        }
+
+        if (arg1 !== undefined && arg2 !== undefined) {
+            localVarQueryParameters['arg'] =  [ObjectSerializer.serialize(arg1, "string"), ObjectSerializer.serialize(arg2, "string")];
+        }
+
+        if (flush !== undefined) {
+            localVarQueryParameters['flush'] = ObjectSerializer.serialize(flush, "boolean");
+        }
+
+        (<any>Object).assign(localVarHeaderParams, options.headers);
+
+        let localVarUseFormData = false;
+
+        let localVarRequestOptions: localVarRequest.Options = {
+            method: 'POST',
+            qs: localVarQueryParameters,
+            headers: localVarHeaderParams,
+            uri: localVarPath,
+            useQuerystring: this._useQuerystring,
+            json: true,
+            qsStringifyOptions: {arrayFormat: 'repeat'}
+        };
+
+        let authenticationPromise = Promise.resolve();
+        authenticationPromise = authenticationPromise.then(() => this.authentications.default.applyToRequest(localVarRequestOptions));
+
+        let interceptorPromise = authenticationPromise;
+        for (const interceptor of this.interceptors) {
+            interceptorPromise = interceptorPromise.then(() => interceptor(localVarRequestOptions));
+        }
+
+        return interceptorPromise.then(() => {
+            if (Object.keys(localVarFormParams).length) {
+                if (localVarUseFormData) {
+                    (<any>localVarRequestOptions).formData = localVarFormParams;
+                } else {
+                    localVarRequestOptions.form = localVarFormParams;
+                }
+            }
+/* EXAMPLE - streams + progress
+            var fs = require('fs');
+            var request = require('request');
+            var progress = require('request-progress');
+
+            // The options argument is optional so you can omit it
+            progress(request('https://az412801.vo.msecnd.net/vhd/VMBuild_20141027/VirtualBox/IE11/Windows/IE11.Win8.1.For.Windows.VirtualBox.zip'), {
+                // throttle: 2000,                    // Throttle the progress event to 2000ms, defaults to 1000ms
+                // delay: 1000,                       // Only start to emit after 1000ms delay, defaults to 0ms
+                // lengthHeader: 'x-transfer-length'  // Length header to use, defaults to content-length
+            })
+            .on('progress', function (state) {
+                // The state is an object that looks like this:
+                // {
+                //     percent: 0.5,               // Overall percent (between 0 to 1)
+                //     speed: 554732,              // The download speed in bytes/sec
+                //     size: {
+                //         total: 90044871,        // The total payload size in bytes
+                //         transferred: 27610959   // The transferred payload size in bytes
+                //     },
+                //     time: {
+                //         elapsed: 36.235,        // The total elapsed seconds since the start (3 decimals)
+                //         remaining: 81.403       // The remaining seconds to finish (3 decimals)
+                //     }
+                // }
+                console.log('progress', state);
+            })
+            .on('error', function (err) {
+                // Do something with err
+            })
+            .on('end', function () {
+                // Do something after request finishes
+            })
+            .pipe(fs.createWriteStream('IE11.Win8.1.For.Windows.VirtualBox.zip'));
+*/
+            // simple implementation of read/write identity stream using transform stream doing nothing
+            //const readWriteStreamBody = new Transform()
+            //readWriteStreamBody._transform = function (chunk,encoding,done)
+            //{
+            //   this.push(chunk)
+            //    done()
+            //}
+            // well, it is actually built-in node:
+            const readWriteStreamBody = new PassThrough();
+
+            return new Promise<{ response: http.IncomingMessage; body: Readable;  }>((resolve, reject) => {
+                localVarRequest(localVarRequestOptions)
+                .on('error', (error) => {
+                    reject(error);
+                }).on('finish', () => {
+                    console.log("reading response finished");
+                }).pipe(readWriteStreamBody);
+                resolve({ response: undefined as any, body: readWriteStreamBody });;
             });
         });
     }

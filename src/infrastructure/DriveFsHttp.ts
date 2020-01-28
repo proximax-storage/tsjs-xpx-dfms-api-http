@@ -2,6 +2,7 @@ import { from as observableFrom, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { DriveFSApi } from "./api/apis";
 import { Stat } from '../model/Stat';
+import { Readable } from 'stream';
 
 export class DriveFsHttp {
     /**
@@ -32,6 +33,10 @@ export class DriveFsHttp {
 
     public get(cid: string, path: string, flush?: boolean, options?: any): Observable<string> {
         return observableFrom(this.driveFsRoutesApi.driveGet(cid, path, flush, options).then(response => response.body));
+    }
+
+    public getAsStream(cid: string, path: string, flush?: boolean, options?: any): Observable<Readable> {
+        return observableFrom(this.driveFsRoutesApi.driveGetAsStream(cid, path, flush, options).then(response => response.body));
     }
 
     public ls(cid: string, path: string, options?: any): Observable<Stat[]> {
