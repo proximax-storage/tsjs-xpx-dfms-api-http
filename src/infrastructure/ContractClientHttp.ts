@@ -1,8 +1,11 @@
 import { from as observableFrom, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ContractClientApi } from "./api/apis";
-import { ContractDTO } from './model/models';
-import { Contract } from '../model/Contract';
+import { ContractClientApi } from "../infrastructure/apis";
+import { ContractDTO } from './models';
+import { Contract } from '../model/model';
+import { Configuration } from './runtime';
+
+const fetchApi = require('node-fetch');
 
 export class ContractClientHttp {
     /**
@@ -16,14 +19,17 @@ export class ContractClientHttp {
      * @param url
      */
     constructor(url: string) {
-        this.contractRoutesApi = new ContractClientApi(url);
+        this.contractRoutesApi = new ContractClientApi(new Configuration({
+            basePath: url,
+            fetchApi: fetchApi
+        }));
     }
 
-    public ls(options?: any): Observable<Contract[]> {
-        return observableFrom(this.contractRoutesApi.ls(options).then(response => response.body.map(dto => Contract.fromDTO(dto))));
+    public ls(): Observable<Contract[]> {
+        return observableFrom(this.contractRoutesApi.ls().then(response => response.map(dto => Contract.fromDTO(dto))));
     }
 
-    public getContract(drive: string, options?: any): Observable<Contract> {
-        return observableFrom(this.contractRoutesApi.getContract(drive, options).then(response => Contract.fromDTO(response.body)));
+    public getContract(drive: string): Observable<Contract> {
+        return observableFrom(this.contractRoutesApi.getContract({arg1: drive}).then(response => Contract.fromDTO(response)));
     }
 }

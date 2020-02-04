@@ -85,6 +85,7 @@ describe('DriveFsHttp', () => {
             const name = 'newFile';
             const data = Buffer.alloc(content.length, content);
 
+            /*
             const formData = {
                 // Pass a simple key-value pair
                 // my_field: 'my_value',
@@ -107,20 +108,21 @@ describe('DriveFsHttp', () => {
                         filename: name
                     }
                 }
-            };
+            };*/
+            const formData = new FormData();
+            formData.append("file", data, {
+                contentType: "application/octet-stream",
+                filename: name,
+            });
 
-            const options = {
-                formData: formData
-            };
-
-            driveFsHttp.add(cid, path, false, options)
+            driveFsHttp.add(cid, path, formData, false)
                 .subscribe((result) => {
                     done();
                 });
         });
 
         it('should add a folder', (done) => {
-            const form = new FormData();
+            const formData = new FormData();
 
             const path = 'someRootDir/';
 
@@ -136,41 +138,20 @@ describe('DriveFsHttp', () => {
             const name2 = 'newAnotherFile2';
             const data2 = Buffer.alloc(content2.length, content2);
 
-            const formData = {
-                files: [
-                    {
-                        value: data0,
-                        options: {
-                            filepath: name0,
-                            contentType: 'application/x-directory'
-                        }
-                    },
-                    {
-                        value: data1,
-                        options: {
-                            filepath: name0 + '/' + name1,
-                            contentType: 'application/octet-stream'
-                        }
-                    }, {
-                        value: data2,
-                        options: {
-                            filepath: name0 + '/' + name2,
-                            contentType: 'application/octet-stream'
-                        }
-                    }
-                ]
-            };
+            formData.append("file[]", data0, {
+                contentType: "application/x-directory",
+                filepath: name0,
+            });
+            formData.append("file[]", data1, {
+                contentType: "application/octet-stream",
+                filepath: name0 + "/" + name1,
+            });
+            formData.append("file[]", data2, {
+                contentType: "application/octet-stream",
+                filepath: name0 + "/" + name2,
+            });
 
-
-            const options = {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                },
-
-                formData: formData
-            };
-
-            driveFsHttp.add(cid, path, false, options)
+            driveFsHttp.add(cid, path, formData, false)
                 .subscribe((result) => {
                     done();
                 });
@@ -249,6 +230,7 @@ describe('DriveFsHttp', () => {
     });
 
     describe('get', () => {
+        /*
         it.only('should get a file as stream', (done) => {
             const downloadToFileStream = createWriteStream('/tmp/tempdownload.file');
             const extract = tarextract();
@@ -296,6 +278,7 @@ describe('DriveFsHttp', () => {
                     });
                 });
         });
+        */
     });
 
     describe('rm', () => {

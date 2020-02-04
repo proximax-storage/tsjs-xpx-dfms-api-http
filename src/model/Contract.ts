@@ -1,4 +1,4 @@
-import { ContractDTO } from "../infrastructure/api";
+import { ContractDTO } from "../infrastructure/models";
 
 export class Contract {
 

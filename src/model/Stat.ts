@@ -1,5 +1,4 @@
-import { StatDTO } from "../infrastructure/api";
-
+import { StatDTO, StatDTOTypeEnum } from "../infrastructure/models"
 export enum TypeEnum {
     File,
     Dir
@@ -28,7 +27,7 @@ export class Stat {
         return new Stat(
             dto.name,
             dto.size,
-            dto.type === StatDTO.TypeEnum.File ? TypeEnum.File : TypeEnum.Dir
+            dto.type === StatDTOTypeEnum.File ? TypeEnum.File : TypeEnum.Dir
         );
     }
 }

@@ -1,8 +1,11 @@
 import { from as observableFrom, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { DriveFSApi } from "./api/apis";
+import { DriveFSApi } from '../infrastructure/apis';
 import { Stat } from '../model/Stat';
 import { Readable } from 'stream';
+import { Configuration, HTTPBody } from './runtime';
+
+const fetchApi = require('node-fetch');
 
 export class DriveFsHttp {
     /**
@@ -16,46 +19,81 @@ export class DriveFsHttp {
      * @param url
      */
     constructor(url: string) {
-        this.driveFsRoutesApi = new DriveFSApi(url);
+        this.driveFsRoutesApi = new DriveFSApi(new Configuration({
+            basePath: url,
+            fetchApi: fetchApi
+        }));
     }
 
-    public add(cid: string, dstPath: string, flush?: boolean, options?: any): Observable<void> {
-        return observableFrom(this.driveFsRoutesApi.driveAdd(cid, dstPath, flush, options).then(_ => {}));
+    public add(cid: string, dstPath: string, body: HTTPBody, flush?: boolean): Observable<void> {
+        return observableFrom(this.driveFsRoutesApi.driveAdd({
+            arg1: cid,
+            arg3: dstPath,
+            flush: flush,
+            body: body
+        }).then(_ => {}));
     }
 
-    public cp(cid: string, srcPath: string, dstPath: string, flush?: boolean, options?: any): Observable<void> {
-        return observableFrom(this.driveFsRoutesApi.driveCp(cid, srcPath, dstPath, flush, options).then(_ => {}));
+    public cp(cid: string, srcPath: string, dstPath: string, flush?: boolean): Observable<void> {
+        return observableFrom(this.driveFsRoutesApi.driveCp({
+            arg1: cid,
+            arg2: srcPath,
+            arg3: dstPath,
+            flush: flush
+        }).then(_ => {}));
     }
 
-    public flush(cid: string, options?: any): Observable<void> {
-        return observableFrom(this.driveFsRoutesApi.driveFlush(cid, options).then(_ => {}));
+    public flush(cid: string): Observable<void> {
+        return observableFrom(this.driveFsRoutesApi.driveFlush({
+            arg1: cid
+        }).then(_ => {}));
     }
 
-    public get(cid: string, path: string, flush?: boolean, options?: any): Observable<string> {
-        return observableFrom(this.driveFsRoutesApi.driveGet(cid, path, flush, options).then(response => response.body));
+    public get(cid: string, path: string, flush?: boolean): Observable<string> {
+        return observableFrom(this.driveFsRoutesApi.driveGet({
+            arg1: cid,
+            arg2: path,
+            flush: flush
+        }));
     }
 
-    public getAsStream(cid: string, path: string, flush?: boolean, options?: any): Observable<Readable> {
-        return observableFrom(this.driveFsRoutesApi.driveGetAsStream(cid, path, flush, options).then(response => response.body));
+    public ls(cid: string, path: string): Observable<Stat[]> {
+        return observableFrom(this.driveFsRoutesApi.driveLs({
+            arg1: cid,
+            arg2: path
+        }).then(response => response.map(dto => Stat.fromDTO(dto))));
     }
 
-    public ls(cid: string, path: string, options?: any): Observable<Stat[]> {
-        return observableFrom(this.driveFsRoutesApi.driveLs(cid, path, options).then(response => response.body.map(dto => Stat.fromDTO(dto))));
+    public mkDir(cid: string, path: string, flush?: boolean): Observable<void> {
+        return observableFrom(this.driveFsRoutesApi.driveMkdir({
+            arg1: cid,
+            arg2: path,
+            flush: flush
+        }).then(_ => {}));
     }
 
-    public mkDir(cid: string, path: string, flush?: boolean, options?: any): Observable<void> {
-        return observableFrom(this.driveFsRoutesApi.driveMkdir(cid, path, flush, options).then(_ => {}));
+    public mv(cid: string, srcPath: string, dstPath: string, flush?: boolean): Observable<void> {
+        return observableFrom(this.driveFsRoutesApi.driveMv({
+            arg1: cid,
+            arg2: srcPath,
+            arg3: dstPath,
+            flush: flush
+        }).then(_ => {}));
     }
 
-    public mv(cid: string, srcPath: string, dstPath: string, flush?: boolean, options?: any): Observable<void> {
-        return observableFrom(this.driveFsRoutesApi.driveMv(cid, srcPath, dstPath, flush, options).then(_ => {}));
+    public rm(cid: string, path: string, flush?: boolean, local?: boolean): Observable<void> {
+        return observableFrom(this.driveFsRoutesApi.driveRm({
+            arg1: cid,
+            arg2: path,
+            flush: flush,
+            local: local
+        }).then(_ => {}));
     }
 
-    public rm(cid: string, path: string, flush?: boolean, local?: boolean, options?: any): Observable<void> {
-        return observableFrom(this.driveFsRoutesApi.driveRm(cid, path, flush, local, options).then(_ => {}));
-    }
-
-    public stat(cid: string, path: string, options?: any): Observable<Stat> {
-        return observableFrom(this.driveFsRoutesApi.driveStat(cid, path, options).then(response => Stat.fromDTO(response.body)));
+    public stat(cid: string, path: string): Observable<Stat> {
+        return observableFrom(this.driveFsRoutesApi.driveStat({
+            arg1: cid,
+            arg2: path
+        }).then(response => Stat.fromDTO(response)));
     }
 }
