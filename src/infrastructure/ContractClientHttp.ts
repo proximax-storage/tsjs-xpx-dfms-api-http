@@ -3,9 +3,7 @@ import { map } from 'rxjs/operators';
 import { ContractClientApi } from "../infrastructure/apis";
 import { ContractDTO } from './models';
 import { Contract } from '../model/model';
-import { Configuration } from './runtime';
-
-const fetchApi = require('node-fetch');
+import { Configuration, ConfigurationParameters } from './runtime';
 
 export class ContractClientHttp {
     /**
@@ -18,11 +16,8 @@ export class ContractClientHttp {
      * Constructor
      * @param url
      */
-    constructor(url: string) {
-        this.contractRoutesApi = new ContractClientApi(new Configuration({
-            basePath: url,
-            fetchApi: fetchApi
-        }));
+    constructor(configuration: ConfigurationParameters) {
+        this.contractRoutesApi = new ContractClientApi(new Configuration(configuration));
     }
 
     public ls(): Observable<Contract[]> {

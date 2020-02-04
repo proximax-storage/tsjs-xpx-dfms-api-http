@@ -5,11 +5,15 @@ import { TypeEnum } from '../../src/model/Stat';
 import { pack as tarpack, extract as tarextract } from 'tar-stream';
 import { createReadStream, createWriteStream } from 'fs';
 
+const fetchApi = require('node-fetch');
 const CID = require('cids');
 const Readable = require('stream').Readable
 const FormData = require('form-data');
 
-const driveFsHttp = new DriveFsHttp("http://127.0.0.1:6366/api/v1");
+const driveFsHttp = new DriveFsHttp({
+    basePath: "http://127.0.0.1:6366/api/v1",
+    fetchApi: fetchApi
+});
 const cid = 'baegbeibondkkrhxfprzwrlgxxltavqhweh2ylhu4hgo5lxjxpqbpfsw2lu';
 
 describe('DriveFsHttp', () => {

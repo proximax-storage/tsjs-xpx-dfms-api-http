@@ -2,7 +2,12 @@ import {deepEqual} from 'assert';
 import {assert, expect} from 'chai';
 import {ContractClientHttp} from '../../src/infrastructure/ContractClientHttp';
 
-const contractClientHttp = new ContractClientHttp("http://127.0.0.1:6366/api/v1");
+const fetchApi = require('node-fetch');
+
+const contractClientHttp = new ContractClientHttp({
+    basePath: "http://127.0.0.1:6366/api/v1",
+    fetchApi: fetchApi
+});
 let drive = '';
 
 describe('ContractClientHttp', () => {

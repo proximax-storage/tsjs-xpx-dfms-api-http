@@ -35,13 +35,13 @@
     "chai": "^4.2.0",
     "cids": "^0.7.1",
     "mocha": "^6.2.2",
+    "node-fetch": "^2.6.0",
     "tar-stream": "^2.1.0",
     "ts-node": "^8.5.4",
     "typescript": "~3.5.3"
   },
   "dependencies": {
     "form-data": "^3.0.0",
-    "node-fetch": "^2.6.0",
     "rxjs": "^6.5.3"
   }
 }

@@ -3,9 +3,7 @@ import { map } from 'rxjs/operators';
 import { DriveFSApi } from '../infrastructure/apis';
 import { Stat } from '../model/Stat';
 import { Readable } from 'stream';
-import { Configuration, HTTPBody } from './runtime';
-
-const fetchApi = require('node-fetch');
+import { Configuration, HTTPBody, ConfigurationParameters } from './runtime';
 
 export class DriveFsHttp {
     /**
@@ -18,11 +16,8 @@ export class DriveFsHttp {
      * Constructor
      * @param url
      */
-    constructor(url: string) {
-        this.driveFsRoutesApi = new DriveFSApi(new Configuration({
-            basePath: url,
-            fetchApi: fetchApi
-        }));
+    constructor(configuration: ConfigurationParameters) {
+        this.driveFsRoutesApi = new DriveFSApi(new Configuration(configuration));
     }
 
     public add(cid: string, dstPath: string, body: HTTPBody, flush?: boolean): Observable<void> {
