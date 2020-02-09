@@ -210,8 +210,8 @@ export class DriveFSApi extends runtime.BaseAPI {
      * Sends file or directory to remote node which adds it to the path of the contract
      * Get file
      */
-    async driveGetRaw(requestParameters: DriveGetRequest): Promise<runtime.ApiResponse<string>> {
-        if (requestParameters.arg1 === null || requestParameters.arg1 === undefined) {
+    async driveGetRaw(requestParameters: DriveGetRequest): Promise<Response> {
+            if (requestParameters.arg1 === null || requestParameters.arg1 === undefined) {
             throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling driveGet.');
         }
 
@@ -236,7 +236,7 @@ export class DriveFSApi extends runtime.BaseAPI {
             query: queryParameters,
         });
 
-        return new runtime.TextApiResponse(response) as any;
+        return response;
     }
 
     /**
@@ -244,9 +244,18 @@ export class DriveFSApi extends runtime.BaseAPI {
      * Get file
      */
     async driveGet(requestParameters: DriveGetRequest): Promise<string> {
-        const response = await this.driveGetRaw(requestParameters);
-        return await response.value();
-    }
+                const response = await this.driveGetRaw(requestParameters);
+            return await (new runtime.TextApiResponse(response) as any).value();
+        }
+
+    /**
+     * Sends file or directory to remote node which adds it to the path of the contract
+     * Get file
+     */
+    async driveGetAsBlob(requestParameters: DriveGetRequest): Promise<Blob> {
+                const response = await this.driveGetRaw(requestParameters);
+            return await (new runtime.BlobApiResponse(response) as any).value();
+        }
 
     /**
      * Ls returns information about the files and directories under the given path

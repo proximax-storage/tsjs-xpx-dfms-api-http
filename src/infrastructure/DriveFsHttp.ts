@@ -52,6 +52,14 @@ export class DriveFsHttp {
         }));
     }
 
+    public getAsBlob(cid: string, path: string, flush?: boolean): Observable<Blob> {
+        return observableFrom(this.driveFsRoutesApi.driveGetAsBlob({
+            arg1: cid,
+            arg2: path,
+            flush: flush
+        }));
+    }
+
     public ls(cid: string, path: string): Observable<Stat[]> {
         return observableFrom(this.driveFsRoutesApi.driveLs({
             arg1: cid,
