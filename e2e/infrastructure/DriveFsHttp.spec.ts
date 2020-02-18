@@ -223,7 +223,7 @@ describe('DriveFsHttp', () => {
 
             const name = 'newFile';
 
-            driveFsHttp.get(cid, path + name, false)
+            driveFsHttp.getAsText(cid, path + name, false)
                 .subscribe((result) => {
                     const s = new Readable();
                     s.push(result);    // the string you want

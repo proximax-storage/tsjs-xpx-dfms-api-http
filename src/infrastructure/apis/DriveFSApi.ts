@@ -229,33 +229,39 @@ export class DriveFSApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
-        const response = await this.request({
+        return this.request({
             path: `/drive/get`,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
         });
-
-        return response;
     }
 
     /**
      * Sends file or directory to remote node which adds it to the path of the contract
      * Get file
      */
-    async driveGet(requestParameters: DriveGetRequest): Promise<string> {
-                const response = await this.driveGetRaw(requestParameters);
-            return await (new runtime.TextApiResponse(response) as any).value();
-        }
+    async driveGetAsText(requestParameters: DriveGetRequest): Promise<string> {
+        const response = await this.driveGetRaw(requestParameters);
+        return await (new runtime.TextApiResponse(response) as any).value();
+    }
 
     /**
      * Sends file or directory to remote node which adds it to the path of the contract
      * Get file
      */
     async driveGetAsBlob(requestParameters: DriveGetRequest): Promise<Blob> {
-                const response = await this.driveGetRaw(requestParameters);
-            return await (new runtime.BlobApiResponse(response) as any).value();
-        }
+        const response = await this.driveGetRaw(requestParameters);
+        return await (new runtime.BlobApiResponse(response) as any).value();
+    }
+
+    /**
+     * Sends file or directory to remote node which adds it to the path of the contract
+     * Get file
+     */
+    async driveGetAsResponse(requestParameters: DriveGetRequest): Promise<Response> {
+        return this.driveGetRaw(requestParameters);
+    }
 
     /**
      * Ls returns information about the files and directories under the given path
