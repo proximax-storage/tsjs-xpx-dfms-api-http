@@ -29,7 +29,7 @@ import {
 export interface DriveAddRequest {
     arg1: string;
     arg3: string;
-    body: runtime.HTTPBody,
+    body: runtime.HTTPBody;
     flush?: boolean;
 }
 
@@ -37,6 +37,11 @@ export interface DriveCpRequest {
     arg1: string;
     arg2: string;
     arg3: string;
+    flush?: boolean;
+}
+
+export interface DriveFileRequest {
+    arg1: string;
     flush?: boolean;
 }
 
@@ -81,7 +86,7 @@ export interface DriveStatRequest {
 }
 
 /**
- * no description
+ *
  */
 export class DriveFSApi extends runtime.BaseAPI {
 
@@ -113,7 +118,7 @@ export class DriveFSApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: requestParameters.body
+            body: requestParameters.body,
         });
 
         return new runtime.JSONApiResponse(response, (jsonValue) => InlineResponse200FromJSON(jsonValue));
@@ -174,6 +179,44 @@ export class DriveFSApi extends runtime.BaseAPI {
     }
 
     /**
+     * Sends file or directory to remote node which adds it to the path of the contract
+     * Get file
+     */
+    async driveFileRaw(requestParameters: DriveFileRequest): Promise<runtime.ApiResponse<string>> {
+        if (requestParameters.arg1 === null || requestParameters.arg1 === undefined) {
+            throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling driveFile.');
+        }
+
+        const queryParameters: runtime.HTTPQuery = {};
+
+        queryParameters['arg'] = requestParameters.arg1;
+
+        if (requestParameters.flush !== undefined) {
+            queryParameters['flush'] = requestParameters.flush;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/drive/file`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        });
+
+        return new runtime.TextApiResponse(response) as any;
+    }
+
+    /**
+     * Sends file or directory to remote node which adds it to the path of the contract
+     * Get file
+     */
+    async driveFile(requestParameters: DriveFileRequest): Promise<string> {
+        const response = await this.driveFileRaw(requestParameters);
+        return await response.value();
+    }
+
+    /**
      * Flush pushes state of the local Drive to all replicators
      * Flush drive
      */
@@ -211,7 +254,7 @@ export class DriveFSApi extends runtime.BaseAPI {
      * Get file
      */
     async driveGetRaw(requestParameters: DriveGetRequest): Promise<Response> {
-            if (requestParameters.arg1 === null || requestParameters.arg1 === undefined) {
+        if (requestParameters.arg1 === null || requestParameters.arg1 === undefined) {
             throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling driveGet.');
         }
 
@@ -229,12 +272,14 @@ export class DriveFSApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
-        return this.request({
+        const response = await this.request({
             path: `/drive/get`,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
         });
+
+        return response;
     }
 
     /**
@@ -243,22 +288,14 @@ export class DriveFSApi extends runtime.BaseAPI {
      */
     async driveGetAsText(requestParameters: DriveGetRequest): Promise<string> {
         const response = await this.driveGetRaw(requestParameters);
-        return await (new runtime.TextApiResponse(response) as any).value();
+        return new runtime.TextApiResponse(response).value();
     }
 
-    /**
-     * Sends file or directory to remote node which adds it to the path of the contract
-     * Get file
-     */
     async driveGetAsBlob(requestParameters: DriveGetRequest): Promise<Blob> {
         const response = await this.driveGetRaw(requestParameters);
-        return await (new runtime.BlobApiResponse(response) as any).value();
+        return new runtime.BlobApiResponse(response).value();
     }
 
-    /**
-     * Sends file or directory to remote node which adds it to the path of the contract
-     * Get file
-     */
     async driveGetAsResponse(requestParameters: DriveGetRequest): Promise<Response> {
         return this.driveGetRaw(requestParameters);
     }

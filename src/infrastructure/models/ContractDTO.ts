@@ -20,7 +20,7 @@ import { exists, mapValues } from '../runtime';
  */
 export interface ContractDTO {
     /**
-     * [Cid](https://github.com/multiformats/cid) (version 1) - special content identifier. 
+     * [Cid](https://github.com/multiformats/cid) (version 1) - special content identifier.
      * @type {string}
      * @memberof ContractDTO
      */

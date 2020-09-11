@@ -42,7 +42,7 @@ export interface GetContractRequest {
 }
 
 /**
- * no description
+ *
  */
 export class ContractClientApi extends runtime.BaseAPI {
 

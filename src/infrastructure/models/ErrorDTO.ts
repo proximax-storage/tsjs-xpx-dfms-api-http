@@ -26,7 +26,12 @@ export interface ErrorDTO {
      */
     message?: string;
     /**
-     * * 0 - Normal - is a normal error. The command failed for some reason that\'s not a bug. * 1 - Client - means the client made an invalid request. * 2 - Implementation - means there\'s a bug in the implementation. * 3 - RateLimited - is returned when the operation has been rate-limited. * 4 - Forbidden - is returned when the client doesn\'t have permission to       perform the requested operation. 
+     * * 0 - Normal - is a normal error. The command failed for some reason that's not a bug.
+     * * 1 - Client - means the client made an invalid request.
+     * * 2 - Implementation - means there's a bug in the implementation.
+     * * 3 - RateLimited - is returned when the operation has been rate-limited.
+     * * 4 - Forbidden - is returned when the client doesn't have permission to
+     *       perform the requested operation.
      * @type {number}
      * @memberof ErrorDTO
      */

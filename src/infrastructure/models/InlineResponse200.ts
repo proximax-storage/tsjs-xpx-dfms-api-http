@@ -20,7 +20,7 @@ import { exists, mapValues } from '../runtime';
  */
 export interface InlineResponse200 {
     /**
-     * [Cid](https://github.com/multiformats/cid) (version 1) - special content identifier. 
+     * [Cid](https://github.com/multiformats/cid) (version 1) - special content identifier.
      * @type {string}
      * @memberof InlineResponse200
      */
