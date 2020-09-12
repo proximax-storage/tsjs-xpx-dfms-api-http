@@ -28,20 +28,15 @@ import {
 
 export interface DriveAddRequest {
     arg1: string;
-    arg3: string;
+    arg4: string;
     body: runtime.HTTPBody;
     flush?: boolean;
 }
 
 export interface DriveCpRequest {
     arg1: string;
-    arg2: string;
     arg3: string;
-    flush?: boolean;
-}
-
-export interface DriveFileRequest {
-    arg1: string;
+    arg4: string;
     flush?: boolean;
 }
 
@@ -51,38 +46,36 @@ export interface DriveFlushRequest {
 
 export interface DriveGetRequest {
     arg1: string;
-    arg2: string;
-    flush?: boolean;
+    arg3: string;
 }
 
 export interface DriveLsRequest {
     arg1: string;
-    arg2: string;
+    arg3: string;
 }
 
 export interface DriveMkdirRequest {
     arg1: string;
-    arg2: string;
+    arg3: string;
     flush?: boolean;
 }
 
 export interface DriveMvRequest {
     arg1: string;
-    arg2: string;
     arg3: string;
+    arg4: string;
     flush?: boolean;
 }
 
 export interface DriveRmRequest {
     arg1: string;
-    arg2: string;
+    arg3: string;
     flush?: boolean;
-    local?: boolean;
 }
 
 export interface DriveStatRequest {
     arg1: string;
-    arg2: string;
+    arg3: string;
 }
 
 /**
@@ -99,13 +92,13 @@ export class DriveFSApi extends runtime.BaseAPI {
             throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling driveAdd.');
         }
 
-        if (requestParameters.arg3 === null || requestParameters.arg3 === undefined) {
-            throw new runtime.RequiredError('arg3','Required parameter requestParameters.arg3 was null or undefined when calling driveAdd.');
+        if (requestParameters.arg4 === null || requestParameters.arg4 === undefined) {
+            throw new runtime.RequiredError('arg4','Required parameter requestParameters.arg4 was null or undefined when calling driveAdd.');
         }
 
         const queryParameters: runtime.HTTPQuery = {};
 
-        queryParameters['arg'] = [ requestParameters.arg1, requestParameters.arg3 ];
+        queryParameters['arg'] = [ requestParameters.arg1, requestParameters.arg4 ];
 
         if (requestParameters.flush !== undefined) {
             queryParameters['flush'] = requestParameters.flush;
@@ -142,17 +135,17 @@ export class DriveFSApi extends runtime.BaseAPI {
             throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling driveCp.');
         }
 
-        if (requestParameters.arg2 === null || requestParameters.arg2 === undefined) {
-            throw new runtime.RequiredError('arg2','Required parameter requestParameters.arg2 was null or undefined when calling driveCp.');
-        }
-
         if (requestParameters.arg3 === null || requestParameters.arg3 === undefined) {
             throw new runtime.RequiredError('arg3','Required parameter requestParameters.arg3 was null or undefined when calling driveCp.');
         }
 
+        if (requestParameters.arg4 === null || requestParameters.arg4 === undefined) {
+            throw new runtime.RequiredError('arg4','Required parameter requestParameters.arg4 was null or undefined when calling driveCp.');
+        }
+
         const queryParameters: runtime.HTTPQuery = {};
 
-        queryParameters['arg'] = [ requestParameters.arg1, requestParameters.arg2, requestParameters.arg3 ];
+        queryParameters['arg'] = [ requestParameters.arg1, requestParameters.arg3, requestParameters.arg4 ];
 
         if (requestParameters.flush !== undefined) {
             queryParameters['flush'] = requestParameters.flush;
@@ -176,44 +169,6 @@ export class DriveFSApi extends runtime.BaseAPI {
      */
     async driveCp(requestParameters: DriveCpRequest): Promise<void> {
         await this.driveCpRaw(requestParameters);
-    }
-
-    /**
-     * Sends file or directory to remote node which adds it to the path of the contract
-     * Get file
-     */
-    async driveFileRaw(requestParameters: DriveFileRequest): Promise<runtime.ApiResponse<string>> {
-        if (requestParameters.arg1 === null || requestParameters.arg1 === undefined) {
-            throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling driveFile.');
-        }
-
-        const queryParameters: runtime.HTTPQuery = {};
-
-        queryParameters['arg'] = requestParameters.arg1;
-
-        if (requestParameters.flush !== undefined) {
-            queryParameters['flush'] = requestParameters.flush;
-        }
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        const response = await this.request({
-            path: `/drive/file`,
-            method: 'POST',
-            headers: headerParameters,
-            query: queryParameters,
-        });
-
-        return new runtime.TextApiResponse(response) as any;
-    }
-
-    /**
-     * Sends file or directory to remote node which adds it to the path of the contract
-     * Get file
-     */
-    async driveFile(requestParameters: DriveFileRequest): Promise<string> {
-        const response = await this.driveFileRaw(requestParameters);
-        return await response.value();
     }
 
     /**
@@ -258,17 +213,13 @@ export class DriveFSApi extends runtime.BaseAPI {
             throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling driveGet.');
         }
 
-        if (requestParameters.arg2 === null || requestParameters.arg2 === undefined) {
-            throw new runtime.RequiredError('arg2','Required parameter requestParameters.arg2 was null or undefined when calling driveGet.');
+        if (requestParameters.arg3 === null || requestParameters.arg3 === undefined) {
+            throw new runtime.RequiredError('arg3','Required parameter requestParameters.arg3 was null or undefined when calling driveGet.');
         }
 
         const queryParameters: runtime.HTTPQuery = {};
 
-        queryParameters['arg'] = [ requestParameters.arg1, requestParameters.arg2 ];
-
-        if (requestParameters.flush !== undefined) {
-            queryParameters['flush'] = requestParameters.flush;
-        }
+        queryParameters['arg'] = [ requestParameters.arg1, requestParameters.arg3 ];
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -309,13 +260,13 @@ export class DriveFSApi extends runtime.BaseAPI {
             throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling driveLs.');
         }
 
-        if (requestParameters.arg2 === null || requestParameters.arg2 === undefined) {
-            throw new runtime.RequiredError('arg2','Required parameter requestParameters.arg2 was null or undefined when calling driveLs.');
+        if (requestParameters.arg3 === null || requestParameters.arg3 === undefined) {
+            throw new runtime.RequiredError('arg3','Required parameter requestParameters.arg3 was null or undefined when calling driveLs.');
         }
 
         const queryParameters: runtime.HTTPQuery = {};
 
-        queryParameters['arg'] = [ requestParameters.arg1, requestParameters.arg2 ];
+        queryParameters['arg'] = [ requestParameters.arg1, requestParameters.arg3 ];
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -347,13 +298,13 @@ export class DriveFSApi extends runtime.BaseAPI {
             throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling driveMkdir.');
         }
 
-        if (requestParameters.arg2 === null || requestParameters.arg2 === undefined) {
-            throw new runtime.RequiredError('arg2','Required parameter requestParameters.arg2 was null or undefined when calling driveMkdir.');
+        if (requestParameters.arg3 === null || requestParameters.arg3 === undefined) {
+            throw new runtime.RequiredError('arg3','Required parameter requestParameters.arg3 was null or undefined when calling driveMkdir.');
         }
 
         const queryParameters: runtime.HTTPQuery = {};
 
-        queryParameters['arg'] = [ requestParameters.arg1, requestParameters.arg2 ];
+        queryParameters['arg'] = [ requestParameters.arg1, requestParameters.arg3 ];
 
         if (requestParameters.flush !== undefined) {
             queryParameters['flush'] = requestParameters.flush;
@@ -388,17 +339,17 @@ export class DriveFSApi extends runtime.BaseAPI {
             throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling driveMv.');
         }
 
-        if (requestParameters.arg2 === null || requestParameters.arg2 === undefined) {
-            throw new runtime.RequiredError('arg2','Required parameter requestParameters.arg2 was null or undefined when calling driveMv.');
-        }
-
         if (requestParameters.arg3 === null || requestParameters.arg3 === undefined) {
             throw new runtime.RequiredError('arg3','Required parameter requestParameters.arg3 was null or undefined when calling driveMv.');
         }
 
+        if (requestParameters.arg4 === null || requestParameters.arg4 === undefined) {
+            throw new runtime.RequiredError('arg4','Required parameter requestParameters.arg4 was null or undefined when calling driveMv.');
+        }
+
         const queryParameters: runtime.HTTPQuery = {};
 
-        queryParameters['arg'] = [ requestParameters.arg1, requestParameters.arg2, requestParameters.arg3 ];
+        queryParameters['arg'] = [ requestParameters.arg1, requestParameters.arg3, requestParameters.arg4 ];
 
         if (requestParameters.flush !== undefined) {
             queryParameters['flush'] = requestParameters.flush;
@@ -433,20 +384,16 @@ export class DriveFSApi extends runtime.BaseAPI {
             throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling driveRm.');
         }
 
-        if (requestParameters.arg2 === null || requestParameters.arg2 === undefined) {
-            throw new runtime.RequiredError('arg2','Required parameter requestParameters.arg2 was null or undefined when calling driveRm.');
+        if (requestParameters.arg3 === null || requestParameters.arg3 === undefined) {
+            throw new runtime.RequiredError('arg3','Required parameter requestParameters.arg3 was null or undefined when calling driveRm.');
         }
 
         const queryParameters: runtime.HTTPQuery = {};
 
-        queryParameters['arg'] = [ requestParameters.arg1, requestParameters.arg2 ];
+        queryParameters['arg'] = [ requestParameters.arg1, requestParameters.arg3 ];
 
         if (requestParameters.flush !== undefined) {
             queryParameters['flush'] = requestParameters.flush;
-        }
-
-        if (requestParameters.local !== undefined) {
-            queryParameters['local'] = requestParameters.local;
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -478,13 +425,13 @@ export class DriveFSApi extends runtime.BaseAPI {
             throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling driveStat.');
         }
 
-        if (requestParameters.arg2 === null || requestParameters.arg2 === undefined) {
-            throw new runtime.RequiredError('arg2','Required parameter requestParameters.arg2 was null or undefined when calling driveStat.');
+        if (requestParameters.arg3 === null || requestParameters.arg3 === undefined) {
+            throw new runtime.RequiredError('arg3','Required parameter requestParameters.arg3 was null or undefined when calling driveStat.');
         }
 
         const queryParameters: runtime.HTTPQuery = {};
 
-        queryParameters['arg'] = [ requestParameters.arg1, requestParameters.arg2 ];
+        queryParameters['arg'] = [ requestParameters.arg1, requestParameters.arg3 ];
 
         const headerParameters: runtime.HTTPHeaders = {};
 

@@ -16,88 +16,70 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface ContractDTO
+ * @interface InviteDTO
  */
-export interface ContractDTO {
+export interface InviteDTO {
     /**
      * [Cid](https://github.com/multiformats/cid) (version 1) - special content identifier.
      * @type {string}
-     * @memberof ContractDTO
+     * @memberof InviteDTO
      */
     drive?: string;
     /**
      * Hex encoded public key.
      * @type {string}
-     * @memberof ContractDTO
+     * @memberof InviteDTO
      */
     owner?: string;
     /**
-     * Hex encoded public keys.
-     * @type {Array<string>}
-     * @memberof ContractDTO
-     */
-    replicators?: Array<string>;
-    /**
-     * [Cid](https://github.com/multiformats/cid) (version 1) - special content identifier.
-     * @type {string}
-     * @memberof ContractDTO
-     */
-    root?: string;
-    /**
-     * Block height when the Contract was started.
-     * @type {number}
-     * @memberof ContractDTO
-     */
-    created?: number;
-    /**
      * 
      * @type {number}
-     * @memberof ContractDTO
+     * @memberof InviteDTO
      */
     duration?: number;
     /**
      * 
      * @type {number}
-     * @memberof ContractDTO
-     */
-    billingPrice?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ContractDTO
-     */
-    billingPeriod?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ContractDTO
+     * @memberof InviteDTO
      */
     space?: number;
     /**
      * 
      * @type {number}
-     * @memberof ContractDTO
+     * @memberof InviteDTO
+     */
+    billingPrice?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof InviteDTO
+     */
+    billingPeriod?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof InviteDTO
      */
     replicas?: number;
     /**
      * 
      * @type {number}
-     * @memberof ContractDTO
+     * @memberof InviteDTO
      */
     minReplicators?: number;
     /**
      * 
      * @type {number}
-     * @memberof ContractDTO
+     * @memberof InviteDTO
      */
     percentApprovers?: number;
 }
 
-export function ContractDTOFromJSON(json: any): ContractDTO {
-    return ContractDTOFromJSONTyped(json, false);
+export function InviteDTOFromJSON(json: any): InviteDTO {
+    return InviteDTOFromJSONTyped(json, false);
 }
 
-export function ContractDTOFromJSONTyped(json: any, ignoreDiscriminator: boolean): ContractDTO {
+export function InviteDTOFromJSONTyped(json: any, ignoreDiscriminator: boolean): InviteDTO {
     if ((json === undefined) || (json === null)) {
         return json;
     }
@@ -105,20 +87,17 @@ export function ContractDTOFromJSONTyped(json: any, ignoreDiscriminator: boolean
         
         'drive': !exists(json, 'drive') ? undefined : json['drive'],
         'owner': !exists(json, 'owner') ? undefined : json['owner'],
-        'replicators': !exists(json, 'replicators') ? undefined : json['replicators'],
-        'root': !exists(json, 'root') ? undefined : json['root'],
-        'created': !exists(json, 'created') ? undefined : json['created'],
         'duration': !exists(json, 'duration') ? undefined : json['duration'],
+        'space': !exists(json, 'space') ? undefined : json['space'],
         'billingPrice': !exists(json, 'billingPrice') ? undefined : json['billingPrice'],
         'billingPeriod': !exists(json, 'billingPeriod') ? undefined : json['billingPeriod'],
-        'space': !exists(json, 'space') ? undefined : json['space'],
         'replicas': !exists(json, 'replicas') ? undefined : json['replicas'],
         'minReplicators': !exists(json, 'minReplicators') ? undefined : json['minReplicators'],
         'percentApprovers': !exists(json, 'percentApprovers') ? undefined : json['percentApprovers'],
     };
 }
 
-export function ContractDTOToJSON(value?: ContractDTO | null): any {
+export function InviteDTOToJSON(value?: InviteDTO | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -129,13 +108,10 @@ export function ContractDTOToJSON(value?: ContractDTO | null): any {
         
         'drive': value.drive,
         'owner': value.owner,
-        'replicators': value.replicators,
-        'root': value.root,
-        'created': value.created,
         'duration': value.duration,
+        'space': value.space,
         'billingPrice': value.billingPrice,
         'billingPeriod': value.billingPeriod,
-        'space': value.space,
         'replicas': value.replicas,
         'minReplicators': value.minReplicators,
         'percentApprovers': value.percentApprovers,

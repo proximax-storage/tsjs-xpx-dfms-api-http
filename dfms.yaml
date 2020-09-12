@@ -16,13 +16,20 @@ info:
 tags:
   - name: ContractClient
     description: Client operations with Drive contracts.
+  - name: ContractReplicator
+    description: Replicator operations with Drive contracts.
   - name: DriveFS
+    description: Remote access to drive disk.
+  - name: Network
+    description: Remote access to drive disk.
+  - name: SuperContract
     description: Remote access to drive disk.
 paths:
   /contract/get:
     post:
       tags:
         - ContractClient
+        - ContractReplicator
       summary: Get Drive contract infromation
       description: Searches for Drive Contract information over the network.
       operationId: getContract
@@ -41,6 +48,7 @@ paths:
     post:
       tags:
       - ContractClient
+      - ContractReplicator
       summary: Creates new Drive contract
       description: |
         Compose synchronously announces invites to the Network with current node as an
@@ -50,62 +58,76 @@ paths:
       operationId: compose
       parameters:
         - in: query
-          name: arg1
+          name: space
           description: |
-            Total Drive space in MB. NOTE - Actual parameter name is 'arg'
+            Total Drive space in MB.
           required: true
+          example: 1000
           schema:
             type: integer
             format: uint64
         - in: query
-          name: arg2
+          name: subPeriod
           description: |
-            Total Drive duration in blocks. Avg block time - 15 seconds. NOTE - Actual parameter name is 'arg'
+            Duration of one Drive subscription (billing) period duration in blocks. Avg block time - 15 seconds.
           required: true
           schema:
             type: integer
-            format: uint64
+            format: int64
         - in: query
           name: replicas
           description: |
-            Desired amount of full data replicas for a new Drive. Defaults to 3.
+            Desired amount of full data replicas for a new Drive.
           required: false
           schema:
             type: integer
-            format: uint64
+            format: uint16
+            default: 3
         - in: query
-          name: min-replicas
+          name: min-replicators
           description: |
-            Minimum amount of requires full data replicas for a new Drive. Defaults to 3.
+            Minimum amount of requires full data replicas for a new Drive.
           required: false
           schema:
             type: integer
-            format: uint64
+            format: uint16
+            default: 3
         - in: query
-          name: billing-price
+          name: subscription-price
           description: |
-            Payment amount for one billing period. Defaults to required space * replicas
+            Payment amount for one subscription (billing) period.
           required: false
           schema:
             type: integer
-            format: uint64
+            format: int64
+            default: space * replicas
         - in: query
-          name: billing-period
+          name: number-subscription-periods
           description: |
-            Period of time after which replicators receieve payment. Defaults to 172800 ~ 1 month.
-            Example - if duration is one year and billing period is one month, then replicators will receive payouts 12 times every month.
+            Number of subscription periods Period of time after which replicators receieve payment.
+            Example - if duration is one year and subscription period is one month, then replicators will receive payouts 12 times every month.
           required: false
           schema:
             type: integer
-            format: uint64
+            format: int64
+            default: 518400 blocks = 60 days ~ 3 month
         - in: query
           name: percent-approvers
           description: |
-            Amount of replicators needed in percents to approve Drive Contract multisignature transactions. Defaults to 66.
+            Amount of replicators needed in percents to approve Drive Contract multisignature transactions.
           required: false
           schema:
             type: integer
-            format: uint64
+            format: uint8
+            default: 66
+        - in: query
+          name: private-key
+          description: |
+            User can generate own private key and pass it.
+          required: false
+          schema:
+            type: string
+            format: PrivKey
       responses:
         '200':
           description: Success
@@ -119,6 +141,7 @@ paths:
     post:
       tags:
       - ContractClient
+      - ContractReplicator
       summary: List Drive contracts node aware of
       description: |
         Lists all the contracts in which Node participates as an owner or a member
@@ -131,14 +154,15 @@ paths:
               schema:
                 type: array
                 items:
-                 $ref: '#/components/schemas/contractDTO'
+                  $ref: '#/components/schemas/contractDTO'
         '400':
           $ref: '#/components/responses/errorResp'
   /contract/ammends:
     post:
       tags:
       - ContractClient
-      summary: Ammendments subscriptio
+      - ContractReplicator
+      summary: Ammendments subscription
       description: |
         Creates subscription for Drive Contract updates/corrections of any contract from the network by ID.
       operationId: ammends
@@ -160,6 +184,132 @@ paths:
                 type: array
                 items:
                  $ref: '#/components/schemas/contractDTO'
+        '400':
+          $ref: '#/components/responses/errorResp'
+  /contract/verify:
+    post:
+      tags:
+      - ContractClient
+      - ContractReplicator
+      summary: Contract verify
+      description: |
+        Initiates verification round between replicators.
+      operationId: verify
+      parameters:
+        - $ref: '#/components/parameters/cidParam'
+      responses:
+        '200':
+          description: |
+            Establishes persitent connection and sends json value through it to the requester as long as new updates appear.
+          headers:
+            -X-Stream-Output:
+              schema:
+                type: integer
+                enum:
+                 - 1
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/verifyResultDTO'
+        '400':
+          $ref: '#/components/responses/errorResp'
+  /contract/finish:
+    post:
+      tags:
+      - ContractClient
+      - ContractReplicator
+      summary: Finish contract
+      description: |
+        Finish contract.
+      operationId: finish
+      parameters:
+        - $ref: '#/components/parameters/cidParam'
+      responses:
+        '200':
+          description: |
+            Establishes persitent connection and sends json value through it to the requester as long as new updates appear.
+          headers:
+            -X-Stream-Output:
+              schema:
+                type: integer
+                enum:
+                 - 1
+        '400':
+          $ref: '#/components/responses/errorResp'
+  /contract/accept:
+    post:
+      tags:
+      - ContractReplicator
+      summary: Accept joins contract
+      description: |
+        Accept joins contract by it's id. Can join only contracts awaiting new members.
+      operationId: accept
+      parameters:
+        - $ref: '#/components/parameters/cidParam'
+      responses:
+        '200':
+          description: |
+            Establishes persitent connection and sends json value through it to the requester as long as new updates appear.
+          headers:
+            -X-Stream-Output:
+              schema:
+                type: integer
+                enum:
+                 - 1
+        '400':
+          $ref: '#/components/responses/errorResp'
+  /contract/accepted:
+    post:
+      tags:
+      - ContractReplicator
+      summary: Show accepted contracts
+      description: |
+        Returns subscription for accepted contracts by the node.
+      operationId: accepted
+      responses:
+        '200':
+          description: |
+            Establishes persitent connection and sends json value through it to the requester as long as new updates appear.
+          headers:
+            -X-Stream-Output:
+              schema:
+                type: integer
+                enum:
+                 - 1
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/contractDTO'
+        '400':
+          $ref: '#/components/responses/errorResp'
+  /contract/invites:
+    post:
+      tags:
+      - ContractReplicator
+      summary: Subscribe to new contracts
+      description: |
+        Creates subscription for new contract invitations. Main use case is to have external contract acceptance logic.
+      operationId: invites
+      responses:
+        '200':
+          description: |
+            Establishes persitent connection and sends json value through it to the requester as long as new updates appear.
+          headers:
+            -X-Stream-Output:
+              schema:
+                type: integer
+                enum:
+                 - 1
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/inviteDTO'
         '400':
           $ref: '#/components/responses/errorResp'
   /drive/add:
@@ -206,36 +356,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/cidParam'
         - $ref: '#/components/parameters/srcParam'
-        - $ref: '#/components/parameters/flushParam'
-      responses:
-        '200':
-          description: Success
-          headers:
-            -X-Stream-Output:
-                schema:
-                  type: integer
-                  enum:
-                   - 1
-          content:
-            text/plain:
-              schema:
-                type: string
-                description: Tar encoded file or directory.
-                format: tar
-        '400':
-          $ref: '#/components/responses/errorResp'
-  /drive/file:
-    post:
-      tags:
-      - DriveFS
-      summary: Get file
-      description: |
-        Sends file or directory to remote node which adds it to the path of the contract
-      operationId: driveFile
-      parameters:
-        - $ref: '#/components/parameters/cidParam'
-        - $ref: '#/components/parameters/cidParam'
-        - $ref: '#/components/parameters/flushParam'
       responses:
         '200':
           description: Success
@@ -264,12 +384,7 @@ paths:
         - $ref: '#/components/parameters/cidParam'
         - $ref: '#/components/parameters/srcParam'
         - $ref: '#/components/parameters/flushParam'
-        - in: query
-          name: local
-          description: Delete file from local disk only, but keep reference on it remotely
-          schema:
-            type: boolean
-            default: false
+        - $ref: '#/components/parameters/localParam'
       responses:
         '200':
           description: Success
@@ -383,6 +498,222 @@ paths:
           description: Success
         '400':
           $ref: '#/components/responses/errorResp'
+  /net/connect:
+    post:
+      tags:
+      - Network
+      summary: Connect to a node
+      description: Connect to a node by it address.
+      operationId: connect
+      parameters:
+        - $ref: '#/components/parameters/addrParam'
+      responses:
+        '200':
+          description: Success
+        '400':
+          $ref: '#/components/responses/errorResp'
+  /net/disconnect:
+    post:
+      tags:
+      - Network
+      summary: Disconnect to a node
+      description: Disconnect to a node by it address.
+      operationId: disconnect
+      parameters:
+        - $ref: '#/components/parameters/addrParam'
+      responses:
+        '200':
+          description: Success
+        '400':
+          $ref: '#/components/responses/errorResp'
+  /net/id:
+    post:
+      tags:
+      - Network
+      summary: Get ID
+      description: Get ID of the node
+      operationId: getid
+      responses:
+        '200':
+          description: Success
+        '400':
+          $ref: '#/components/responses/errorResp'
+  /net/peers:
+    post:
+      tags:
+      - Network
+      summary: Connected peers
+      description: Get all connected peers.
+      operationId: peers
+      responses:
+        '200':
+          description: Success
+        '400':
+          $ref: '#/components/responses/errorResp'
+  /net/addrs:
+    post:
+      tags:
+      - Network
+      summary: Node addresses
+      description: Get all node addresses.
+      operationId: addresses
+      responses:
+        '200':
+          description: Success
+        '400':
+          $ref: '#/components/responses/errorResp'
+  /supercontract/deploy:
+    post:
+      tags:
+      - SuperContract
+      summary: Deploy a supercontract
+      description: Deploy a new SuperContract by file hash. Return the SuperContract ID.
+      operationId: deploy
+      parameters:
+        - $ref: '#/components/parameters/cidParam'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/cidDTO'
+        '400':
+          $ref: '#/components/responses/errorResp'
+  /supercontract/execute:
+    post:
+      tags:
+      - SuperContract
+      summary: Execute a supercontract
+      description: Start execution of a supercontract. Return the Transaction ID.
+      operationId: execute
+      parameters:
+        - $ref: '#/components/parameters/cidParam'
+        - in: query
+          name: gas
+          schema:
+            type: integer
+          required: true
+          description: Count of gas for execution.
+          example: 10000000
+        - in: query
+          name: funName
+          schema:
+            type: string
+          required: true
+          description: Function name.
+          example: hello
+        - in: query
+          name: params
+          schema:
+            type: array
+            items:
+              type: string
+              example: Bob
+          required: false
+          description: Function parameters if required.
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/cidDTO'
+        '400':
+          $ref: '#/components/responses/errorResp'
+  /supercontract/get:
+    post:
+      tags:
+      - SuperContract
+      summary: Get a supercontract
+      description: Get a supercontract by ID.
+      operationId: getSC
+      parameters:
+        - $ref: '#/components/parameters/cidParam'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/superContractDTO'
+        '400':
+          $ref: '#/components/responses/errorResp'
+  /supercontract/ls:
+    post:
+      tags:
+      - SuperContract
+      summary: Get SuperContects
+      description: Get all drive SuperContects.
+      operationId: lsSC
+      parameters:
+        - $ref: '#/components/parameters/cidParam'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/cidDTO'
+        '400':
+          $ref: '#/components/responses/errorResp'
+  /supercontract/results:
+    post:
+      tags:
+      - SuperContract
+      summary: Results of a Supercontract
+      description: Get results of a Supercontract by its ID.
+      operationId: results
+      parameters:
+        - $ref: '#/components/parameters/cidParam'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  example: /supercontracts/result.txt bafybeihx52ggdr7izy6upoo4leackhoqogvbpu3ytufgpstesshpuulgli
+        '400':
+          $ref: '#/components/responses/errorResp'
+  /supercontract/executions:
+    post:
+      tags:
+      - SuperContract
+      summary: Executions results
+      description: Get all execution results by SuperContract ID. Returns CID of results.
+      operationId: executions
+      parameters:
+        - $ref: '#/components/parameters/cidParam'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/cidDTO'
+        '400':
+          $ref: '#/components/responses/errorResp'
+  /supercontract/deactivate:
+    post:
+      tags:
+      - SuperContract
+      summary: Deactivate SuperContract
+      description: Deactivate some SuperContract by its ID.
+      operationId: deactivate
+      parameters:
+        - $ref: '#/components/parameters/cidParam'
+      responses:
+        '200':
+          description: Success
+        '400':
+          $ref: '#/components/responses/errorResp'
 components:
   responses:
     errorResp:
@@ -400,16 +731,26 @@ components:
       required: true
       schema:
         type: string
-    srcParam:
+      example: bafzbeigai3eoy2ccc7ybwjfz5r3rdxqrinwi4rwytly24tdbh6yk7zslrm
+    addrParam:
       in: query
       name: arg2
+      description: |
+        Address of some node.
+      required: true
+      schema:
+        type: string
+      example: /ip4/127.0.0.1/tcp/63666/p2p/12D3L7AUwnPXj7odaWGzWcWwWD1mGrB5d5yr6zLrimHcyiZLVWcH
+    srcParam:
+      in: query
+      name: arg3
       description: The source path of the file in Drive.
       required: true
       schema:
         type: string
     dstParam:
       in: query
-      name: arg3
+      name: arg4
       description: The destination path.
       required: true
       schema:
@@ -419,6 +760,13 @@ components:
       in: query
       name: flush
       description: To immediately send data to replicators
+      schema:
+        type: boolean
+        default: false
+    localParam:
+      in: query
+      name: flush
+      description: Delete file from local disk only, but keep reference on it remotely
       schema:
         type: boolean
         default: false
@@ -439,8 +787,46 @@ components:
             - "dir"
     cidDTO:
       type: string
+      example: baegaajaiaqjcahaxr4ry4styn74ronvr2nvfdmgxtrzyhsci2xqpw5eisrisrgn5
       description: |
         [Cid](https://github.com/multiformats/cid) (version 1) - special content identifier.
+    inviteDTO:
+      type: object
+      properties:
+        drive:
+          $ref: '#/components/schemas/cidDTO'
+        owner:
+          type: string
+          example: 080412200eb448d07c7ccb312989ac27aa052738ff589e2f83973f909b506b450dc5c4e2
+          description: Hex encoded public key.
+        duration:
+          type: integer
+          example: 12
+          format: int64
+        space:
+          type: integer
+          example: 1000
+          format: int64
+        billingPrice:
+          type: integer
+          example: 5000
+          format: int64
+        billingPeriod:
+          type: integer
+          example: 1
+          format: int64
+        replicas:
+          type: integer
+          example: 5
+          format: uint16
+        minReplicators:
+          type: integer
+          example: 3
+          format: uint16
+        percentApprovers:
+          type: integer
+          example: 100
+          format: uint8
     contractDTO:
       type: object
       properties:
@@ -448,36 +834,83 @@ components:
           $ref: '#/components/schemas/cidDTO'
         owner:
           type: string
+          example: 080412200eb448d07c7ccb312989ac27aa052738ff589e2f83973f909b506b450dc5c4e2
           description: Hex encoded public key.
         replicators:
           type: array
           description: Hex encoded public keys.
           items:
-            type: string
+            $ref: '#/components/schemas/cidDTO'
+            example:
+              [
+                0804122068f50e10e5b8be2b7e9ddb687a667d6e94dd55fe02b4aed8195f51f9a242558b,
+                0804122073472a2e9dcea5c2a36eb7f6a34a634010391ec89e883d67360db16f28b9443c,
+                08041220d03918e35573c66578b5a0eed723fe2a46208783e13498751d9315115ca06d4b
+              ]
         root:
-          type: string
+          $ref: '#/components/schemas/cidDTO'
+          example: QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn
         created:
           type: integer
           format: int64
+          example: 741
           description: Block height when the Contract was started.
         duration:
           type: integer
+          example: 12
           format: int64
-        space:
-          type: integer
-          format: int64
-        replicas:
-          type: integer
-          format: uint16
-        percentApprovers:
-          type: integer
-          format: uint16
         billingPrice:
           type: integer
+          example: 5000
           format: int64
         billingPeriod:
           type: integer
-          format: int
+          example: 1
+          format: int64
+        space:
+          type: integer
+          example: 1000
+          format: int64
+        replicas:
+          type: integer
+          example: 5
+          format: uint16
+        minReplicators:
+          type: integer
+          example: 3
+          format: uint16
+        percentApprovers:
+          type: integer
+          example: 100
+          format: uint8
+    superContractDTO:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/cidDTO'
+        drive:
+          $ref: '#/components/schemas/contractDTO'
+        file:
+          $ref: '#/components/schemas/cidDTO'
+        vmversion:
+          type: integer
+          example: 1
+        functions:
+          type: array
+          items:
+            type: string
+            example: func1
+    verifyResultDTO:
+      type: object
+      properties:
+        replicator:
+          type: string
+          description: Hex encoded public keys.
+          example: 0804122068f50e10e5b8be2b7e9ddb687a667d6e94dd55fe02b4aed8195f51f9a242558b
+        faultyBlocks:
+          type: array
+          items:
+            $ref: '#/components/parameters/cidParam'
     errorDTO:
       type: object
       properties:

@@ -21,11 +21,27 @@ import {
     ErrorDTO,
     ErrorDTOFromJSON,
     ErrorDTOToJSON,
+    InviteDTO,
+    InviteDTOFromJSON,
+    InviteDTOToJSON,
     VerifyResultDTO,
     VerifyResultDTOFromJSON,
     VerifyResultDTOToJSON,
 } from '../models';
 
+export interface AcceptRequest {
+    arg1: string;
+}
+// same ifcs already exported by ContractClientApi - comment it out here and import it instead
+import {
+    AmmendsRequest,
+    ComposeRequest,
+    FinishRequest,
+    GetContractRequest,
+    VerifyRequest
+} from './';
+
+/*
 export interface AmmendsRequest {
     arg1: string;
 }
@@ -52,11 +68,75 @@ export interface GetContractRequest {
 export interface VerifyRequest {
     arg1: string;
 }
+*/
 
 /**
  *
  */
-export class ContractClientApi extends runtime.BaseAPI {
+export class ContractReplicatorApi extends runtime.BaseAPI {
+
+    /**
+     * Accept joins contract by it\'s id. Can join only contracts awaiting new members.
+     * Accept joins contract
+     */
+    async acceptRaw(requestParameters: AcceptRequest): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters.arg1 === null || requestParameters.arg1 === undefined) {
+            throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling accept.');
+        }
+
+        const queryParameters: runtime.HTTPQuery = {};
+
+        if (requestParameters.arg1 !== undefined) {
+            queryParameters['arg'] = requestParameters.arg1;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/contract/accept`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        });
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Accept joins contract by it\'s id. Can join only contracts awaiting new members.
+     * Accept joins contract
+     */
+    async accept(requestParameters: AcceptRequest): Promise<void> {
+        await this.acceptRaw(requestParameters);
+    }
+
+    /**
+     * Returns subscription for accepted contracts by the node.
+     * Show accepted contracts
+     */
+    async acceptedRaw(): Promise<runtime.ApiResponse<Array<ContractDTO>>> {
+        const queryParameters: runtime.HTTPQuery = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/contract/accepted`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        });
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(ContractDTOFromJSON));
+    }
+
+    /**
+     * Returns subscription for accepted contracts by the node.
+     * Show accepted contracts
+     */
+    async accepted(): Promise<Array<ContractDTO>> {
+        const response = await this.acceptedRaw();
+        return await response.value();
+    }
 
     /**
      * Creates subscription for Drive Contract updates/corrections of any contract from the network by ID.
@@ -221,7 +301,7 @@ export class ContractClientApi extends runtime.BaseAPI {
             query: queryParameters,
         });
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ContractDTOFromJSON(jsonValue.Contract));
+        return new runtime.JSONApiResponse(response, (jsonValue) => ContractDTOFromJSON(jsonValue));
     }
 
     /**
@@ -230,6 +310,34 @@ export class ContractClientApi extends runtime.BaseAPI {
      */
     async getContract(requestParameters: GetContractRequest): Promise<ContractDTO> {
         const response = await this.getContractRaw(requestParameters);
+        return await response.value();
+    }
+
+    /**
+     * Creates subscription for new contract invitations. Main use case is to have external contract acceptance logic.
+     * Subscribe to new contracts
+     */
+    async invitesRaw(): Promise<runtime.ApiResponse<Array<InviteDTO>>> {
+        const queryParameters: runtime.HTTPQuery = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/contract/invites`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        });
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(InviteDTOFromJSON));
+    }
+
+    /**
+     * Creates subscription for new contract invitations. Main use case is to have external contract acceptance logic.
+     * Subscribe to new contracts
+     */
+    async invites(): Promise<Array<InviteDTO>> {
+        const response = await this.invitesRaw();
         return await response.value();
     }
 
@@ -249,7 +357,7 @@ export class ContractClientApi extends runtime.BaseAPI {
             query: queryParameters,
         });
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.Ids.map(id => { return { drive: id }}).map(ContractDTOFromJSON));
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(ContractDTOFromJSON));
     }
 
     /**

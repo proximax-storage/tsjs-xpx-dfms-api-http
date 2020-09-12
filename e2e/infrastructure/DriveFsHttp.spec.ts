@@ -223,7 +223,7 @@ describe('DriveFsHttp', () => {
 
             const name = 'newFile';
 
-            driveFsHttp.getAsText(cid, path + name, false)
+            driveFsHttp.getAsText(cid, path + name)
                 .subscribe((result) => {
                     const s = new Readable();
                     s.push(result);    // the string you want
@@ -288,7 +288,7 @@ describe('DriveFsHttp', () => {
     describe('rm', () => {
         it('should delete a file/directory', (done) => {
             const path = 'someRootDir';
-            driveFsHttp.rm(cid, path, false, false)
+            driveFsHttp.rm(cid, path, false)
                 .subscribe((result) => {
                     done();
                 });

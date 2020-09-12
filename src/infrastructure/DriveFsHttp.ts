@@ -23,7 +23,7 @@ export class DriveFsHttp {
     public add(cid: string, dstPath: string, body: HTTPBody, flush?: boolean): Observable<void> {
         return observableFrom(this.driveFsRoutesApi.driveAdd({
             arg1: cid,
-            arg3: dstPath,
+            arg4: dstPath,
             flush: flush,
             body: body
         }).then(_ => {}));
@@ -32,8 +32,8 @@ export class DriveFsHttp {
     public cp(cid: string, srcPath: string, dstPath: string, flush?: boolean): Observable<void> {
         return observableFrom(this.driveFsRoutesApi.driveCp({
             arg1: cid,
-            arg2: srcPath,
-            arg3: dstPath,
+            arg3: srcPath,
+            arg4: dstPath,
             flush: flush
         }).then(_ => {}));
     }
@@ -44,41 +44,38 @@ export class DriveFsHttp {
         }).then(_ => {}));
     }
 
-    public getAsText(cid: string, path: string, flush?: boolean): Observable<string> {
+    public getAsText(cid: string, path: string): Observable<string> {
         return observableFrom(this.driveFsRoutesApi.driveGetAsText({
             arg1: cid,
-            arg2: path,
-            flush: flush
+            arg3: path
         }));
     }
 
-    public getAsBlob(cid: string, path: string, flush?: boolean): Observable<Blob> {
+    public getAsBlob(cid: string, path: string): Observable<Blob> {
         return observableFrom(this.driveFsRoutesApi.driveGetAsBlob({
             arg1: cid,
-            arg2: path,
-            flush: flush
+            arg3: path
         }));
     }
 
-    public getAsResponse(cid: string, path: string, flush?: boolean): Observable<Response> {
+    public getAsResponse(cid: string, path: string): Observable<Response> {
         return observableFrom(this.driveFsRoutesApi.driveGetAsResponse({
             arg1: cid,
-            arg2: path,
-            flush: flush
+            arg3: path
         }));
     }
 
     public ls(cid: string, path: string): Observable<Stat[]> {
         return observableFrom(this.driveFsRoutesApi.driveLs({
             arg1: cid,
-            arg2: path
+            arg3: path
         }).then(response => response.map(dto => Stat.fromDTO(dto))));
     }
 
     public mkDir(cid: string, path: string, flush?: boolean): Observable<void> {
         return observableFrom(this.driveFsRoutesApi.driveMkdir({
             arg1: cid,
-            arg2: path,
+            arg3: path,
             flush: flush
         }).then(_ => {}));
     }
@@ -86,25 +83,24 @@ export class DriveFsHttp {
     public mv(cid: string, srcPath: string, dstPath: string, flush?: boolean): Observable<void> {
         return observableFrom(this.driveFsRoutesApi.driveMv({
             arg1: cid,
-            arg2: srcPath,
-            arg3: dstPath,
+            arg3: srcPath,
+            arg4: dstPath,
             flush: flush
         }).then(_ => {}));
     }
 
-    public rm(cid: string, path: string, flush?: boolean, local?: boolean): Observable<void> {
+    public rm(cid: string, path: string, flush?: boolean): Observable<void> {
         return observableFrom(this.driveFsRoutesApi.driveRm({
             arg1: cid,
-            arg2: path,
-            flush: flush,
-            local: local
+            arg3: path,
+            flush: flush
         }).then(_ => {}));
     }
 
     public stat(cid: string, path: string): Observable<Stat> {
         return observableFrom(this.driveFsRoutesApi.driveStat({
             arg1: cid,
-            arg2: path
+            arg3: path
         }).then(response => Stat.fromDTO(response)));
     }
 }
