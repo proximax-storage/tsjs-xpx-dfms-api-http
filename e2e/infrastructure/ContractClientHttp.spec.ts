@@ -30,7 +30,17 @@ describe('ContractClientHttp', () => {
                 .subscribe((contract) => {
                     expect(contract).not.to.be.undefined;
                     expect(contract.drive).to.be.equal(drive);
+                    expect(contract.owner).not.to.be.undefined;
+                    expect(contract.replicators).not.to.be.undefined;
+                    expect(contract.root).not.to.be.undefined;
+                    expect(contract.created).not.to.be.undefined;
                     expect(contract.duration).not.to.be.undefined;
+                    expect(contract.billingPrice).not.to.be.undefined;
+                    expect(contract.billingPeriod).not.to.be.undefined;
+                    expect(contract.space).not.to.be.undefined;
+                    expect(contract.replicas).not.to.be.undefined;
+                    expect(contract.minReplicators).not.to.be.undefined;
+                    expect(contract.percentApprovers).not.to.be.undefined;
                     done();
             });
         });

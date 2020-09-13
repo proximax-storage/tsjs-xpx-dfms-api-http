@@ -373,6 +373,34 @@ paths:
                 format: tar
         '400':
           $ref: '#/components/responses/errorResp'
+  /drive/file:
+    post:
+      tags:
+      - DriveFS
+      summary: Get file
+      description: |
+        Gets file or directory from the remote node
+      operationId: driveFile
+      parameters:
+        - $ref: '#/components/parameters/cidParam'
+        - $ref: '#/components/parameters/cidParam'
+      responses:
+        '200':
+          description: Success
+          headers:
+            -X-Stream-Output:
+                schema:
+                  type: integer
+                  enum:
+                   - 1
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: Tar encoded file or directory.
+                format: tar
+        '400':
+          $ref: '#/components/responses/errorResp'
   /drive/rm:
     post:
       tags:

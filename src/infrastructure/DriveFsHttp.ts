@@ -4,6 +4,7 @@ import { DriveFSApi } from '../infrastructure/apis';
 import { Stat } from '../model/Stat';
 import { Readable } from 'stream';
 import { Configuration, HTTPBody, ConfigurationParameters } from './runtime';
+import { CidParam, CidParamFromJSON } from './models';
 
 export class DriveFsHttp {
     /**
@@ -20,13 +21,13 @@ export class DriveFsHttp {
         this.driveFsRoutesApi = new DriveFSApi(new Configuration(configuration));
     }
 
-    public add(cid: string, dstPath: string, body: HTTPBody, flush?: boolean): Observable<void> {
+    public add(cid: string, dstPath: string, body: HTTPBody, flush?: boolean): Observable<CidParam> {
         return observableFrom(this.driveFsRoutesApi.driveAdd({
             arg1: cid,
             arg4: dstPath,
             flush: flush,
             body: body
-        }).then(_ => {}));
+        }).then(result => CidParamFromJSON(result)));
     }
 
     public cp(cid: string, srcPath: string, dstPath: string, flush?: boolean): Observable<void> {
@@ -62,6 +63,27 @@ export class DriveFsHttp {
         return observableFrom(this.driveFsRoutesApi.driveGetAsResponse({
             arg1: cid,
             arg3: path
+        }));
+    }
+
+    public fileAsText(cid: string, cidFile: string): Observable<string> {
+        return observableFrom(this.driveFsRoutesApi.driveFileAsText({
+            arg1: cid,
+            arg5: cidFile
+        }));
+    }
+
+    public fileAsBlob(cid: string, cidFile: string): Observable<Blob> {
+        return observableFrom(this.driveFsRoutesApi.driveFileAsBlob({
+            arg1: cid,
+            arg5: cidFile
+        }));
+    }
+
+    public fileAsResponse(cid: string, cidFile: string): Observable<Response> {
+        return observableFrom(this.driveFsRoutesApi.driveFileAsResponse({
+            arg1: cid,
+            arg5: cidFile
         }));
     }
 

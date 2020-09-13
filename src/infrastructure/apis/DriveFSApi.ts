@@ -40,6 +40,11 @@ export interface DriveCpRequest {
     flush?: boolean;
 }
 
+export interface DriveFileRequest {
+    arg1: string;
+    arg5: string;
+}
+
 export interface DriveFlushRequest {
     arg1: string;
 }
@@ -172,6 +177,53 @@ export class DriveFSApi extends runtime.BaseAPI {
     }
 
     /**
+     * Gets file or directory from remote node
+     * Get file
+     */
+    async driveFileRaw(requestParameters: DriveFileRequest): Promise<Response> {
+        if (requestParameters.arg1 === null || requestParameters.arg1 === undefined) {
+            throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling driveFile.');
+        }
+
+        if (requestParameters.arg5 === null || requestParameters.arg5 === undefined) {
+            throw new runtime.RequiredError('arg5','Required parameter requestParameters.arg5 was null or undefined when calling driveFile.');
+        }
+
+        const queryParameters: runtime.HTTPQuery = {};
+
+        queryParameters['arg'] = [ requestParameters.arg1, requestParameters.arg5 ];
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/drive/file`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        });
+
+        return response;
+    }
+
+    /**
+     * Gets file or directory from the remote node
+     * Get file
+     */
+    async driveFileAsText(requestParameters: DriveFileRequest): Promise<string> {
+        const response = await this.driveFileRaw(requestParameters);
+        return new runtime.TextApiResponse(response).value();
+    }
+
+    async driveFileAsBlob(requestParameters: DriveFileRequest): Promise<Blob> {
+        const response = await this.driveFileRaw(requestParameters);
+        return new runtime.BlobApiResponse(response).value();
+    }
+
+    async driveFileAsResponse(requestParameters: DriveFileRequest): Promise<Response> {
+        return this.driveFileRaw(requestParameters);
+    }
+
+    /**
      * Flush pushes state of the local Drive to all replicators
      * Flush drive
      */
@@ -234,7 +286,7 @@ export class DriveFSApi extends runtime.BaseAPI {
     }
 
     /**
-     * Sends file or directory to remote node which adds it to the path of the contract
+     * Gets file or directory from the remote node
      * Get file
      */
     async driveGetAsText(requestParameters: DriveGetRequest): Promise<string> {

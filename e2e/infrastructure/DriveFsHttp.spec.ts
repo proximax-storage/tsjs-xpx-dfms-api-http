@@ -4,6 +4,7 @@ import { DriveFsHttp } from '../../src/infrastructure/DriveFsHttp';
 import { TypeEnum } from '../../src/model/Stat';
 import { pack as tarpack, extract as tarextract } from 'tar-stream';
 import { createReadStream, createWriteStream } from 'fs';
+import { CidParam } from '../../src/infrastructure';
 
 const fetchApi = require('node-fetch');
 const CID = require('cids');
@@ -15,6 +16,7 @@ const driveFsHttp = new DriveFsHttp({
     fetchApi: fetchApi
 });
 const cid = 'baegbeibondkkrhxfprzwrlgxxltavqhweh2ylhu4hgo5lxjxpqbpfsw2lu';
+let helloWorldCid:CidParam = '';
 
 describe('DriveFsHttp', () => {
     describe('cid', () => {
@@ -121,6 +123,8 @@ describe('DriveFsHttp', () => {
 
             driveFsHttp.add(cid, path, formData, false)
                 .subscribe((result) => {
+                    expect(result).not.to.be.undefined;
+                    helloWorldCid = result;
                     done();
                 });
         });
@@ -224,6 +228,42 @@ describe('DriveFsHttp', () => {
             const name = 'newFile';
 
             driveFsHttp.getAsText(cid, path + name)
+                .subscribe((result) => {
+                    const s = new Readable();
+                    s.push(result);    // the string you want
+                    s.push(null);      // indicates end-of-file basically - the end of the stream
+                    s.pipe(extract);
+                });
+        });
+    });
+
+    describe('file', () => {
+        it('should get a file via cid', (done) => {
+            const extract = tarextract();
+            let fileBody = '';
+
+            extract.on('entry', (header, stream, next) => {
+                // header is the tar header
+                // stream is the content body (might be an empty stream)
+                // call next when you are done with this entry
+
+                stream.on('data', (chunk) => {
+                    fileBody += chunk;
+                });
+
+                stream.on('end', () => {
+                    next(); // ready for next entry
+                });
+
+                stream.resume(); // just auto drain the stream
+            });
+
+            extract.on('finish', () => {
+                expect(fileBody).to.be.equal('Hello world!');
+                done();
+            });
+
+            driveFsHttp.fileAsText(cid, helloWorldCid.toString())
                 .subscribe((result) => {
                     const s = new Readable();
                     s.push(result);    // the string you want
