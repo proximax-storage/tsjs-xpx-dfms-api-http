@@ -29,6 +29,8 @@ import {
     VerifyResultDTOToJSON,
 } from '../models';
 
+import { AbortController } from 'abort-controller';
+
 export interface AcceptRequest {
     arg1: string;
 }
@@ -40,6 +42,7 @@ import {
     GetContractRequest,
     VerifyRequest
 } from './';
+import { Observable } from 'rxjs';
 
 /*
 export interface AmmendsRequest {
@@ -189,6 +192,18 @@ export class ContractReplicatorApi extends runtime.BaseAPI {
 
         const queryParameters: runtime.HTTPQuery = {};
 
+        // oh boy, this duplicate "arg" stuff is just plain stupid
+        queryParameters['arg'] = [
+            requestParameters.space,
+            requestParameters.subPeriod,
+            requestParameters.replicas || '',
+            requestParameters.minReplicators || '',
+            requestParameters.subscriptionPrice || '',
+            requestParameters.numberSubscriptionPeriods || '',
+            requestParameters.percentApprovers || '',
+            requestParameters.privateKey || ''
+         ];
+        /*
         if (requestParameters.space !== undefined) {
             queryParameters['space'] = requestParameters.space;
         }
@@ -220,6 +235,7 @@ export class ContractReplicatorApi extends runtime.BaseAPI {
         if (requestParameters.privateKey !== undefined) {
             queryParameters['private-key'] = requestParameters.privateKey;
         }
+        */
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -301,7 +317,7 @@ export class ContractReplicatorApi extends runtime.BaseAPI {
             query: queryParameters,
         });
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ContractDTOFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => ContractDTOFromJSON(jsonValue.Contract));
     }
 
     /**
@@ -317,7 +333,11 @@ export class ContractReplicatorApi extends runtime.BaseAPI {
      * Creates subscription for new contract invitations. Main use case is to have external contract acceptance logic.
      * Subscribe to new contracts
      */
-    async invitesRaw(): Promise<runtime.ApiResponse<Array<InviteDTO>>> {
+    async invitesRaw(): Promise<{response: Response, abortController: AbortController}> {
+
+        const abortController = new AbortController();
+        const signal = abortController.signal;
+
         const queryParameters: runtime.HTTPQuery = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -327,9 +347,10 @@ export class ContractReplicatorApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
+            signal: signal
         });
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(InviteDTOFromJSON));
+        return {response, abortController};
     }
 
     /**
@@ -338,7 +359,12 @@ export class ContractReplicatorApi extends runtime.BaseAPI {
      */
     async invites(): Promise<Array<InviteDTO>> {
         const response = await this.invitesRaw();
-        return await response.value();
+        return new runtime.JSONApiResponse(response.response, (jsonValue) => jsonValue.map(InviteDTOFromJSON)).value();
+    }
+
+    async invitesAsStream(): Promise<ReadableStream<Uint8Array> | null> {
+        const response = await this.invitesRaw();
+        return response.response.body;
     }
 
     /**
@@ -357,7 +383,7 @@ export class ContractReplicatorApi extends runtime.BaseAPI {
             query: queryParameters,
         });
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(ContractDTOFromJSON));
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.Ids.map(id => { return { drive: id }}).map(ContractDTOFromJSON));
     }
 
     /**

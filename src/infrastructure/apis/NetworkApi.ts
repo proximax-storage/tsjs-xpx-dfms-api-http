@@ -37,7 +37,7 @@ export class NetworkApi extends runtime.BaseAPI {
      * Get all node addresses.
      * Node addresses
      */
-    async addressesRaw(): Promise<runtime.ApiResponse<void>> {
+    async addressesRaw(): Promise<runtime.ApiResponse<Array<string>>> {
         const queryParameters: runtime.HTTPQuery = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -49,15 +49,16 @@ export class NetworkApi extends runtime.BaseAPI {
             query: queryParameters,
         });
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse(response, json => json.Addrs);
     }
 
     /**
      * Get all node addresses.
      * Node addresses
      */
-    async addresses(): Promise<void> {
-        await this.addressesRaw();
+    async addresses(): Promise<Array<string>> {
+        const response = await this.addressesRaw();
+        return await response.value();
     }
 
     /**
@@ -161,7 +162,7 @@ export class NetworkApi extends runtime.BaseAPI {
      * Get all connected peers.
      * Connected peers
      */
-    async peersRaw(): Promise<runtime.ApiResponse<void>> {
+    async peersRaw(): Promise<runtime.ApiResponse<Array<Array<string>>>> {
         const queryParameters: runtime.HTTPQuery = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -173,15 +174,16 @@ export class NetworkApi extends runtime.BaseAPI {
             query: queryParameters,
         });
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse(response, json => json.Peers.map(peer => peer.Addrs));
     }
 
     /**
      * Get all connected peers.
      * Connected peers
      */
-    async peers(): Promise<void> {
-        await this.peersRaw();
+    async peers(): Promise<Array<Array<string>>> {
+        const response = await this.peersRaw();
+        return await response.value();
     }
 
 }

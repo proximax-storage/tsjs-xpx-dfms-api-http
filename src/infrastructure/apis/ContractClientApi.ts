@@ -109,13 +109,25 @@ export class ContractClientApi extends runtime.BaseAPI {
 
         const queryParameters: runtime.HTTPQuery = {};
 
+        // oh boy, this duplicate "arg" stuff is just plain stupid
+        queryParameters['arg'] = [
+            requestParameters.space,
+            requestParameters.subPeriod + 's',
+            // requestParameters.replicas || '',
+            // requestParameters.minReplicators || '',
+            // requestParameters.subscriptionPrice || '',
+            // requestParameters.numberSubscriptionPeriods || '',
+            // requestParameters.percentApprovers || '',
+            // requestParameters.privateKey || ''
+         ];
+        /*
         if (requestParameters.space !== undefined) {
             queryParameters['space'] = requestParameters.space;
         }
 
         if (requestParameters.subPeriod !== undefined) {
             queryParameters['subPeriod'] = requestParameters.subPeriod;
-        }
+        }*/
 
         if (requestParameters.replicas !== undefined) {
             queryParameters['replicas'] = requestParameters.replicas;
@@ -150,7 +162,7 @@ export class ContractClientApi extends runtime.BaseAPI {
             query: queryParameters,
         });
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ContractDTOFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => ContractDTOFromJSON(jsonValue.Contract));
     }
 
     /**

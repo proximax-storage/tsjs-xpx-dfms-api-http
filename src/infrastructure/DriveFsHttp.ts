@@ -1,10 +1,9 @@
 import { from as observableFrom, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { DriveFSApi } from '../infrastructure/apis';
-import { Stat } from '../model/Stat';
 import { Readable } from 'stream';
 import { Configuration, HTTPBody, ConfigurationParameters } from './runtime';
-import { CidParam, CidParamFromJSON } from './models';
+import { CidParam, CidParamFromJSON, StatDTO } from './models';
 
 export class DriveFsHttp {
     /**
@@ -87,11 +86,11 @@ export class DriveFsHttp {
         }));
     }
 
-    public ls(cid: string, path: string): Observable<Stat[]> {
+    public ls(cid: string, path: string): Observable<StatDTO[]> {
         return observableFrom(this.driveFsRoutesApi.driveLs({
             arg1: cid,
             arg3: path
-        }).then(response => response.map(dto => Stat.fromDTO(dto))));
+        }));
     }
 
     public mkDir(cid: string, path: string, flush?: boolean): Observable<void> {
@@ -119,10 +118,10 @@ export class DriveFsHttp {
         }).then(_ => {}));
     }
 
-    public stat(cid: string, path: string): Observable<Stat> {
+    public stat(cid: string, path: string): Observable<StatDTO> {
         return observableFrom(this.driveFsRoutesApi.driveStat({
             arg1: cid,
             arg3: path
-        }).then(response => Stat.fromDTO(response)));
+        }));
     }
 }
