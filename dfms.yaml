@@ -590,7 +590,7 @@ paths:
           description: Success
         '400':
           $ref: '#/components/responses/errorResp'
-  /supercontract/deploy:
+  /sc/deploy:
     post:
       tags:
       - SuperContract
@@ -608,7 +608,7 @@ paths:
                 $ref: '#/components/schemas/cidDTO'
         '400':
           $ref: '#/components/responses/errorResp'
-  /supercontract/execute:
+  /sc/execute:
     post:
       tags:
       - SuperContract
@@ -649,7 +649,7 @@ paths:
                 $ref: '#/components/schemas/cidDTO'
         '400':
           $ref: '#/components/responses/errorResp'
-  /supercontract/get:
+  /sc/get:
     post:
       tags:
       - SuperContract
@@ -667,7 +667,7 @@ paths:
                 $ref: '#/components/schemas/superContractDTO'
         '400':
           $ref: '#/components/responses/errorResp'
-  /supercontract/ls:
+  /sc/ls:
     post:
       tags:
       - SuperContract
@@ -687,7 +687,7 @@ paths:
                   $ref: '#/components/schemas/cidDTO'
         '400':
           $ref: '#/components/responses/errorResp'
-  /supercontract/results:
+  /sc/results:
     post:
       tags:
       - SuperContract
@@ -708,7 +708,7 @@ paths:
                   example: /supercontracts/result.txt bafybeihx52ggdr7izy6upoo4leackhoqogvbpu3ytufgpstesshpuulgli
         '400':
           $ref: '#/components/responses/errorResp'
-  /supercontract/executions:
+  /sc/executions:
     post:
       tags:
       - SuperContract
@@ -728,7 +728,7 @@ paths:
                   $ref: '#/components/schemas/cidDTO'
         '400':
           $ref: '#/components/responses/errorResp'
-  /supercontract/deactivate:
+  /sc/deactivate:
     post:
       tags:
       - SuperContract

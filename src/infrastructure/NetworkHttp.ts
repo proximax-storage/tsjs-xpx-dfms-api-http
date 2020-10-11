@@ -20,6 +20,10 @@ export class NetworkHttp  {
         this.network = new NetworkApi(new Configuration(configuration));
     }
 
+    id(): Observable<void> { // TODO: return type is invalid, fix yaml
+        return observableFrom(this.network.getid());
+    }
+
     addresses(): Observable<string[]> {
 /*
 {
@@ -40,8 +44,10 @@ export class NetworkHttp  {
      * @param address single address as returned from addresses()
      */
     connect(address: string): Observable<void> {
-        return observableFrom((this.network.connect({
-            arg2: address
-        })));
+        return observableFrom(this.network.connect({arg2: address}));
+    }
+
+    disconnect(address: string): Observable<void> {
+        return observableFrom(this.network.disconnect({arg2: address}));
     }
 }

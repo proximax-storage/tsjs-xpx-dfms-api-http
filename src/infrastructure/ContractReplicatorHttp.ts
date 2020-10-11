@@ -1,7 +1,7 @@
 import { concat, from as observableFromPromise, Observable, of, pipe } from 'rxjs';
 import { concatAll, flatMap, map, mergeMap } from 'rxjs/operators';
 import { ContractClientApi, ContractReplicatorApi } from "../infrastructure/apis";
-import { ContractDTO, InviteDTO, InviteDTOFromJSON } from './models';
+import { ContractDTO, ContractDTOFromJSON, InviteDTO, InviteDTOFromJSON } from './models';
 import { Configuration, ConfigurationParameters } from './runtime';
 import { exception } from 'console';
 import { ContractClientHttp } from './ContractClientHttp';
@@ -22,7 +22,6 @@ export class ContractReplicatorHttp extends ContractClientHttp {
         this.contractReplicator = new ContractReplicatorApi(new Configuration(configuration));
     }
 
-    // TODO: don't return DTO, return Invite class instance
     public invites(): Observable<InviteDTO> {
 /*
 wget -q -O - http://localhost:6468/api/v1/contract/invites
@@ -47,12 +46,32 @@ wget -q -O - http://localhost:6468/api/v1/contract/invites
                     response.abortController.abort();
                 }
             });
-        }))
+        }));
     }
 
     public accept(drive: string): Observable<void> {
-        return observableFromPromise(this.contractReplicator.accept({
-            arg1: drive
+        return observableFromPromise(this.contractReplicator.accept({arg1: drive}));
+    }
+
+    public accepted(): Observable<ContractDTO> {
+        return observableFromPromise(this.contractReplicator.acceptedRaw())
+        .pipe(flatMap(response => {
+            return new Observable<ContractDTO> (subscriber => {
+                const rl = readline.createInterface({
+                    input: response.response.body,
+                    crlfDelay: Infinity
+                });
+                rl.on('line', (line) => {
+                    const parsed = JSON.parse(line);
+                    subscriber.next(ContractDTOFromJSON(parsed.Contract));
+                });
+                rl.on('close', () => {
+                    subscriber.complete();
+                });
+                return function unsubscribe() {
+                    response.abortController.abort();
+                }
+            });
         }));
     }
 }

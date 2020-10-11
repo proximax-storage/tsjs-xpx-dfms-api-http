@@ -77,7 +77,7 @@ export class SuperContractApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
-            path: `/supercontract/deactivate`,
+            path: `/sc/deactivate`,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
@@ -112,7 +112,7 @@ export class SuperContractApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
-            path: `/supercontract/deploy`,
+            path: `/sc/deploy`,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
@@ -168,7 +168,7 @@ export class SuperContractApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
-            path: `/supercontract/execute`,
+            path: `/sc/execute`,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
@@ -204,7 +204,7 @@ export class SuperContractApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
-            path: `/supercontract/executions`,
+            path: `/sc/executions`,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
@@ -240,7 +240,7 @@ export class SuperContractApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
-            path: `/supercontract/get`,
+            path: `/sc/get`,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
@@ -276,7 +276,7 @@ export class SuperContractApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
-            path: `/supercontract/ls`,
+            path: `/sc/ls`,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
@@ -312,7 +312,7 @@ export class SuperContractApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
-            path: `/supercontract/results`,
+            path: `/sc/results`,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,

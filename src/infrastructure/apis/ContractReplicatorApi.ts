@@ -117,7 +117,11 @@ export class ContractReplicatorApi extends runtime.BaseAPI {
      * Returns subscription for accepted contracts by the node.
      * Show accepted contracts
      */
-    async acceptedRaw(): Promise<runtime.ApiResponse<Array<ContractDTO>>> {
+    async acceptedRaw(): Promise<{response: Response, abortController: AbortController}> {
+
+        const abortController = new AbortController();
+        const signal = abortController.signal;
+
         const queryParameters: runtime.HTTPQuery = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -127,9 +131,10 @@ export class ContractReplicatorApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
+            signal: signal
         });
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(ContractDTOFromJSON));
+        return {response, abortController};
     }
 
     /**
@@ -138,7 +143,12 @@ export class ContractReplicatorApi extends runtime.BaseAPI {
      */
     async accepted(): Promise<Array<ContractDTO>> {
         const response = await this.acceptedRaw();
-        return await response.value();
+        return new runtime.JSONApiResponse(response.response, (jsonValue) => jsonValue.map(ContractDTOFromJSON)).value();
+    }
+
+    async acceptedAsStream(): Promise<ReadableStream<Uint8Array> | null> {
+        const response = await this.acceptedRaw();
+        return response.response.body;
     }
 
     /**
@@ -192,25 +202,10 @@ export class ContractReplicatorApi extends runtime.BaseAPI {
 
         const queryParameters: runtime.HTTPQuery = {};
 
-        // oh boy, this duplicate "arg" stuff is just plain stupid
         queryParameters['arg'] = [
             requestParameters.space,
-            requestParameters.subPeriod,
-            requestParameters.replicas || '',
-            requestParameters.minReplicators || '',
-            requestParameters.subscriptionPrice || '',
-            requestParameters.numberSubscriptionPeriods || '',
-            requestParameters.percentApprovers || '',
-            requestParameters.privateKey || ''
+            requestParameters.subPeriod + 's', // TODO: what is this? any time unit allowed?,
          ];
-        /*
-        if (requestParameters.space !== undefined) {
-            queryParameters['space'] = requestParameters.space;
-        }
-
-        if (requestParameters.subPeriod !== undefined) {
-            queryParameters['subPeriod'] = requestParameters.subPeriod;
-        }
 
         if (requestParameters.replicas !== undefined) {
             queryParameters['replicas'] = requestParameters.replicas;
@@ -235,7 +230,6 @@ export class ContractReplicatorApi extends runtime.BaseAPI {
         if (requestParameters.privateKey !== undefined) {
             queryParameters['private-key'] = requestParameters.privateKey;
         }
-        */
 
         const headerParameters: runtime.HTTPHeaders = {};
 

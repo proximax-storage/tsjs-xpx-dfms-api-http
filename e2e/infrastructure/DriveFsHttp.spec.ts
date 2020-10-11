@@ -14,7 +14,8 @@ const driveFsHttp = new DriveFsHttp({
     basePath: "http://127.0.0.1:6366/api/v1",
     fetchApi: fetchApi
 });
-const cid = 'baegbeibondkkrhxfprzwrlgxxltavqhweh2ylhu4hgo5lxjxpqbpfsw2lu';
+// const cid = 'baegbeibondkkrhxfprzwrlgxxltavqhweh2ylhu4hgo5lxjxpqbpfsw2lu';
+const cid = 'baegaajaiaqjcbyanzisp7mmxid5afhdy6vqaoh5jsvlre2ebklzsdl6ooebyl5oa';
 let helloWorldCid:CidParam = '';
 
 describe('DriveFsHttp', () => {
@@ -324,7 +325,7 @@ describe('DriveFsHttp', () => {
         */
     });
 
-    describe('rm', () => {
+    xdescribe('rm', () => {
         it('should delete a file/directory', (done) => {
             const path = 'someRootDir';
             driveFsHttp.rm(cid, path, false)
