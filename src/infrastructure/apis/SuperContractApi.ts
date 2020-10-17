@@ -22,6 +22,7 @@ import {
     SuperContractDTOFromJSON,
     SuperContractDTOToJSON,
 } from '../models';
+import { ExecuteResultDTO, ExecuteResultDTOFromJSON } from '../models/ExecuteResultDTO';
 
 export interface DeactivateRequest {
     arg1: string;
@@ -29,6 +30,7 @@ export interface DeactivateRequest {
 
 export interface DeployRequest {
     arg1: string;
+    arg2: string;
 }
 
 export interface ExecuteRequest {
@@ -36,10 +38,6 @@ export interface ExecuteRequest {
     gas: number;
     funName: string;
     params?: Array<string>;
-}
-
-export interface ExecutionsRequest {
-    arg1: string;
 }
 
 export interface GetSCRequest {
@@ -98,15 +96,19 @@ export class SuperContractApi extends runtime.BaseAPI {
      * Deploy a new SuperContract by file hash. Return the SuperContract ID.
      * Deploy a supercontract
      */
-    async deployRaw(requestParameters: DeployRequest): Promise<runtime.ApiResponse<string>> {
+    async deployRaw(requestParameters: DeployRequest): Promise<runtime.JSONApiResponse<{Result: string}>> {
         if (requestParameters.arg1 === null || requestParameters.arg1 === undefined) {
+            throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling deploy.');
+        }
+
+        if (requestParameters.arg2 === null || requestParameters.arg2 === undefined) {
             throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling deploy.');
         }
 
         const queryParameters: runtime.HTTPQuery = {};
 
         if (requestParameters.arg1 !== undefined) {
-            queryParameters['arg'] = requestParameters.arg1;
+            queryParameters['arg'] = [requestParameters.arg1, requestParameters.arg2];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -118,7 +120,7 @@ export class SuperContractApi extends runtime.BaseAPI {
             query: queryParameters,
         });
 
-        return new runtime.TextApiResponse(response) as any;
+        return new runtime.JSONApiResponse(response) as any;
     }
 
     /**
@@ -127,14 +129,14 @@ export class SuperContractApi extends runtime.BaseAPI {
      */
     async deploy(requestParameters: DeployRequest): Promise<string> {
         const response = await this.deployRaw(requestParameters);
-        return await response.value();
+        return await (await response.value()).Result;
     }
 
     /**
      * Start execution of a supercontract. Return the Transaction ID.
      * Execute a supercontract
      */
-    async executeRaw(requestParameters: ExecuteRequest): Promise<runtime.ApiResponse<string>> {
+    async executeRaw(requestParameters: ExecuteRequest): Promise<runtime.JSONApiResponse<ExecuteResultDTO>> {
         if (requestParameters.arg1 === null || requestParameters.arg1 === undefined) {
             throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling execute.');
         }
@@ -150,15 +152,7 @@ export class SuperContractApi extends runtime.BaseAPI {
         const queryParameters: runtime.HTTPQuery = {};
 
         if (requestParameters.arg1 !== undefined) {
-            queryParameters['arg'] = requestParameters.arg1;
-        }
-
-        if (requestParameters.gas !== undefined) {
-            queryParameters['gas'] = requestParameters.gas;
-        }
-
-        if (requestParameters.funName !== undefined) {
-            queryParameters['funName'] = requestParameters.funName;
+            queryParameters['arg'] = [ requestParameters.arg1, requestParameters.gas, requestParameters.funName ];
         }
 
         if (requestParameters.params) {
@@ -168,20 +162,29 @@ export class SuperContractApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
-            path: `/sc/execute`,
+            path: `/sc/exec`,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
         });
 
-        return new runtime.TextApiResponse(response) as any;
+        return new runtime.JSONApiResponse(response, (jsonValue) => ExecuteResultDTOFromJSON(jsonValue));
+
+/*
+        {
+            "ScId": "baegqajaiaqjcbosyy5e27zv6ndjgsjdb6wbfcltsaoeiuvacxrogzqhtkre5no7z",
+            "TxHash": {
+                "/": "bafybeicljbviqkm4uemzvp2a6fmtfleopsobla3k54z6umyzjdpu4omuey"
+            }
+        }
+*/
     }
 
     /**
      * Start execution of a supercontract. Return the Transaction ID.
      * Execute a supercontract
      */
-    async execute(requestParameters: ExecuteRequest): Promise<string> {
+    async execute(requestParameters: ExecuteRequest): Promise<ExecuteResultDTO> {
         const response = await this.executeRaw(requestParameters);
         return await response.value();
     }
@@ -190,16 +193,9 @@ export class SuperContractApi extends runtime.BaseAPI {
      * Get all execution results by SuperContract ID. Returns CID of results.
      * Executions results
      */
-    async executionsRaw(requestParameters: ExecutionsRequest): Promise<runtime.ApiResponse<Array<string>>> {
-        if (requestParameters.arg1 === null || requestParameters.arg1 === undefined) {
-            throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling executions.');
-        }
+    async executionsRaw(): Promise<runtime.JSONApiResponse<Array<ExecuteResultDTO>>> {
 
         const queryParameters: runtime.HTTPQuery = {};
-
-        if (requestParameters.arg1 !== undefined) {
-            queryParameters['arg'] = requestParameters.arg1;
-        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -210,15 +206,23 @@ export class SuperContractApi extends runtime.BaseAPI {
             query: queryParameters,
         });
 
-        return new runtime.JSONApiResponse<any>(response);
+        return new runtime.JSONApiResponse(response, (jsonValue) => (jsonValue.Ids.map(id => ExecuteResultDTOFromJSON({TxHash: id}))));
+        /*
+        {
+            "Ids": [
+                {
+                    "/": "bafybeicljbviqkm4uemzvp2a6fmtfleopsobla3k54z6umyzjdpu4omuey"
+                }
+            ]
+        }*/
     }
 
     /**
      * Get all execution results by SuperContract ID. Returns CID of results.
      * Executions results
      */
-    async executions(requestParameters: ExecutionsRequest): Promise<Array<string>> {
-        const response = await this.executionsRaw(requestParameters);
+    async executions(): Promise<Array<ExecuteResultDTO>> {
+        const response = await this.executionsRaw();
         return await response.value();
     }
 
@@ -226,7 +230,7 @@ export class SuperContractApi extends runtime.BaseAPI {
      * Get a supercontract by ID.
      * Get a supercontract
      */
-    async getSCRaw(requestParameters: GetSCRequest): Promise<runtime.ApiResponse<SuperContractDTO>> {
+    async getSCRaw(requestParameters: GetSCRequest): Promise<runtime.JSONApiResponse<SuperContractDTO>> {
         if (requestParameters.arg1 === null || requestParameters.arg1 === undefined) {
             throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling getSC.');
         }
@@ -246,7 +250,7 @@ export class SuperContractApi extends runtime.BaseAPI {
             query: queryParameters,
         });
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => SuperContractDTOFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => SuperContractDTOFromJSON(jsonValue.SuperContract));
     }
 
     /**
@@ -262,7 +266,7 @@ export class SuperContractApi extends runtime.BaseAPI {
      * Get all drive SuperContects.
      * Get SuperContects
      */
-    async lsSCRaw(requestParameters: LsSCRequest): Promise<runtime.ApiResponse<Array<string>>> {
+    async lsSCRaw(requestParameters: LsSCRequest): Promise<runtime.JSONApiResponse<{Ids: Array<string>}>> {
         if (requestParameters.arg1 === null || requestParameters.arg1 === undefined) {
             throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling lsSC.');
         }
@@ -291,7 +295,7 @@ export class SuperContractApi extends runtime.BaseAPI {
      */
     async lsSC(requestParameters: LsSCRequest): Promise<Array<string>> {
         const response = await this.lsSCRaw(requestParameters);
-        return await response.value();
+        return await (await response.value()).Ids;
     }
 
     /**

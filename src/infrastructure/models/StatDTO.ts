@@ -64,9 +64,9 @@ export function StatDTOToJSON(value?: StatDTO | null): any {
     }
     return {
 
-        'name': value.name,
-        'size': value.size,
-        'type': value.type,
+        'Name': value.name,
+        'Dize': value.size,
+        'Type': value.type,
     };
 }
 

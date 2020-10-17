@@ -251,8 +251,7 @@ describe('ContractClientHttp', () => {
                 subAccepted3.unsubscribe();
             });
 
-            const subCompose = contractClientHttp.compose(10, 3600, 3, 3, 100, 10, 66, undefined).subscribe((contract) => {
-//            const subCompose = contractClientHttp.compose(66, 6666).subscribe((contract) => {
+            const subCompose = contractClientHttp.compose(1000000, 3600, 3, 3, 100, 10, 66, undefined).subscribe((contract) => {
                 console.log(contract);
                 expect(contract).not.to.be.undefined;
                 expect(contract.drive).to.be.equal(acceptedInvite.drive);
@@ -280,21 +279,21 @@ describe('ContractClientHttp', () => {
     });
 
     describe('supercontracts', () => {
+        const scFileName = 'helloworld.wat';
+        let scID = '';
         it('should add a file/supercontract source', (done) => {
-
             const path = '/';
-            const name = 'helloworld.wat';
             const data = readFileSync(__dirname + '/../../resources/helloworld.wat')
             const formData = new FormData();
             formData.append('file', data, {
                 contentType: 'application/octet-stream',
-                filename: name,
+                filename: scFileName,
             });
             driveFsHttp.add(driveCID, path, formData, false)
                 .subscribe((result) => {
                     expect(result).not.to.be.undefined;
                     helloWorldCID = result.toString();
-                    console.log('SC: ' + helloWorldCID);
+                    console.log('SC file CID: ' + helloWorldCID);
                     done();
                 });
         });
@@ -302,11 +301,58 @@ describe('ContractClientHttp', () => {
         it('should call flush on the drive', (done) => {
             driveFsHttp.flush(driveCID).subscribe(() => {
                 done();
-            })
+            });
+        });
+
+        it('should deploy the supercontract', (done) => {
+            supercontractHttp.deploy(driveCID, scFileName).subscribe(superContractID => {
+                scID = superContractID;
+                console.log('SC ID: ' + superContractID);
+                done();
+            });
+        });
+
+        it('should list supercontracts', (done) => {
+            supercontractHttp.ls(driveCID).subscribe(superContracts => {
+                expect(superContracts).not.to.be.undefined;
+                expect(superContracts.length).to.be.greaterThan(0);
+                expect(superContracts.find(sc => sc === scID)).to.be.equal(scID);
+                done();
+            });
         })
 
-        xit('should deploy the supercontract', (done) => {
-        })
+        it('should get the supercontract', (done) => {
+            supercontractHttp.get(scID).subscribe(superContractDTO => {
+                expect(superContractDTO.id).to.be.equal(scID);
+                expect(superContractDTO.file).to.be.equal(helloWorldCID);
+                expect((superContractDTO.drive as any).drive).to.be.equal(driveCID);
+                expect(superContractDTO.vmversion).to.be.gte(1);
+                // expect(superContractDTO.functions).not.to.be.undefined; // TODO: re-enable, once we have a sc with some fn
+                done();
+            });
+        });
+
+        xit('should call execute on the supercontract', (done) => {
+            supercontractHttp.execute(scID, 10, 'app_main').subscribe(result => {
+            // supercontractHttp.execute('baegqajaiaqjcao6rlsdhgbxnk5o2yg3ynpwnxfqckgaetqsgcns7slfppo2j5ds5', 10, 'app_main').subscribe(result => {
+                console.log("Execute result: " + result);
+                done();
+            });
+        });
+
+        it('should get executions of the supercontract', (done) => {
+            supercontractHttp.executions().subscribe(results => {
+                console.log("Execute results: " + results)
+                done();
+            });
+        });
+
+        it('should deactivate a supercontract', (done) => {
+            supercontractHttp.deactivate(scID).subscribe(() => {
+                done();
+            });
+        });
+
     });
 
     xdescribe('verify', () => { // TODO: re-enable, get it working

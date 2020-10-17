@@ -608,7 +608,7 @@ paths:
                 $ref: '#/components/schemas/cidDTO'
         '400':
           $ref: '#/components/responses/errorResp'
-  /sc/execute:
+  /sc/exec:
     post:
       tags:
       - SuperContract

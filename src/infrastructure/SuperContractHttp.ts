@@ -4,6 +4,7 @@ import { DriveFSApi, SuperContractApi } from '../infrastructure/apis';
 import { Readable } from 'stream';
 import { Configuration, HTTPBody, ConfigurationParameters } from './runtime';
 import { CidParam, CidParamFromJSON, StatDTO, SuperContractDTO } from './models';
+import { ExecuteResultDTO } from './models/ExecuteResultDTO';
 
 export class SuperContractHttp {
     /**
@@ -20,9 +21,10 @@ export class SuperContractHttp {
         this.superContractRoutesApi = new SuperContractApi(new Configuration(configuration));
     }
 
-    public deploy(cid: string): Observable<string> {
+    public deploy(cid: string, driveFilePath: string): Observable<string> {
         return observableFrom(this.superContractRoutesApi.deploy({
-            arg1: cid
+            arg1: cid,
+            arg2: driveFilePath
         }));
     }
 
@@ -38,7 +40,7 @@ export class SuperContractHttp {
         }));
     }
 
-    public execute(cid, gas, functionName): Observable<String> {
+    public execute(cid, gas, functionName): Observable<ExecuteResultDTO> {
         return observableFrom(this.superContractRoutesApi.execute({
             arg1: cid,
             gas: gas,
@@ -46,10 +48,8 @@ export class SuperContractHttp {
         }));
     }
 
-    public executions(cid): Observable<String[]> {
-        return observableFrom(this.superContractRoutesApi.executions({
-            arg1: cid
-        }));
+    public executions(): Observable<ExecuteResultDTO[]> {
+        return observableFrom(this.superContractRoutesApi.executions());
     }
 
     public results(cid): Observable<String[]> {
