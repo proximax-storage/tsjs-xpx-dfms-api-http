@@ -1,9 +1,9 @@
 import { from as observableFrom, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ContractClientApi } from "../infrastructure/apis";
-import { ContractDTO, VerifyResultDTO } from './models';
 import { Configuration, ConfigurationParameters } from './runtime';
 import { exception } from 'console';
+import { Contract, VerifyResult } from './models';
 
 export class ContractClientHttp {
     /**
@@ -20,36 +20,36 @@ export class ContractClientHttp {
         this.contractRoutesApi = new ContractClientApi(new Configuration(configuration));
     }
 
-    public ls(): Observable<ContractDTO[]> {
-        return observableFrom(this.contractRoutesApi.ls());
+    public ls(): Observable<string[]> {
+        return observableFrom(this.contractRoutesApi.ls().then(cidListWrap => cidListWrap.ids as string[]));
     }
 
-    public getContract(drive: string): Observable<ContractDTO> {
-        return observableFrom(this.contractRoutesApi.getContract({arg1: drive}));
+    public getContract(drive: string): Observable<Contract> {
+        return observableFrom(this.contractRoutesApi.getContract({argDrive: drive}).then(contractWrap => contractWrap.contract as Contract));
     }
 
-    public compose(space: number, subPeriod: number, replicas?: number, minReplicators?: number, subscriptionPrice?: number, numberSubscriptionPeriods?: number, percentApprovers?: number, privateKey?: string) {
+    public compose(space: number, duration: string, replicas?: number, minReplicators?: number, subscriptionPrice?: number, numberSubscriptionPeriods?: number, percentApprovers?: number, privateKey?: string): Observable<Contract> {
         return observableFrom(this.contractRoutesApi.compose({
-            space,
-            subPeriod,
+            argSpace: space,
+            argDuration: duration,
             replicas,
             minReplicators,
             subscriptionPrice,
             numberSubscriptionPeriods,
             percentApprovers,
             privateKey
-        }));
+        }).then(contractWrap => contractWrap.contract as Contract));
     }
 
-    public verify(drive: string): Observable<VerifyResultDTO[]> {
-        return observableFrom(this.contractRoutesApi.verify({arg1: drive}));
+    public verify(drive: string): Observable<VerifyResult[]> {
+        return observableFrom(this.contractRoutesApi.verify({argDrive: drive}));
     }
 
     public finish(drive: string): Observable<void> {
-        return observableFrom(this.contractRoutesApi.finish({arg1: drive}));
+        return observableFrom(this.contractRoutesApi.finish({argDrive: drive}));
     }
 
-    public ammends(drive: string): Observable<ContractDTO[]> {
-        return observableFrom(this.contractRoutesApi.ammends({arg1: drive}));
+    public ammends(drive: string): Observable<Contract> {
+        return observableFrom(this.contractRoutesApi.ammends({argDrive: drive}).then(contractWrap => contractWrap.contract as Contract));
     }
 }

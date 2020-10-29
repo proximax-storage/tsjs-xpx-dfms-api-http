@@ -3,7 +3,7 @@ import { assert, expect } from 'chai';
 import { DriveFsHttp } from '../../src/infrastructure/DriveFsHttp';
 import { pack as tarpack, extract as tarextract } from 'tar-stream';
 import { createReadStream, createWriteStream } from 'fs';
-import { CidParam, StatDTOTypeEnum } from '../../src/infrastructure';
+import { Stat, StatTypeEnum } from '../../src/infrastructure';
 
 const fetchApi = require('node-fetch');
 const CID = require('cids');
@@ -15,8 +15,8 @@ const driveFsHttp = new DriveFsHttp({
     fetchApi: fetchApi
 });
 // const cid = 'baegbeibondkkrhxfprzwrlgxxltavqhweh2ylhu4hgo5lxjxpqbpfsw2lu';
-const cid = 'baegaajaiaqjcbyanzisp7mmxid5afhdy6vqaoh5jsvlre2ebklzsdl6ooebyl5oa';
-let helloWorldCid:CidParam = '';
+const cid = 'baegaajaiaqjcbg3doymeeul5vyrkyvf72w2nw2emb3jple6o5dl27lhjg4hrvukz';
+let helloWorldCid = '';
 
 describe('DriveFsHttp', () => {
     describe('cid', () => {
@@ -77,7 +77,7 @@ describe('DriveFsHttp', () => {
                 .subscribe((result) => {
                     expect(result.name).to.be.equal(path);
                     expect(result.size).not.to.be.undefined;
-                    expect(result.type).to.be.equal(StatDTOTypeEnum.Dir)
+                    expect(result.type).to.be.equal(StatTypeEnum.Dir)
                     done();
                 });
         });

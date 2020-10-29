@@ -14,69 +14,69 @@
 
 import { exists, mapValues } from '../runtime';
 import {
-    ContractDTO,
-    ContractDTOFromJSON,
-    ContractDTOFromJSONTyped,
-    ContractDTOToJSON,
+    Contract,
+    ContractFromJSON,
+    ContractFromJSONTyped,
+    ContractToJSON,
 } from './';
 
 /**
  * 
  * @export
- * @interface SuperContractDTO
+ * @interface SuperContract
  */
-export interface SuperContractDTO {
+export interface SuperContract {
     /**
      * [Cid](https://github.com/multiformats/cid) (version 1) - special content identifier.
      * @type {string}
-     * @memberof SuperContractDTO
+     * @memberof SuperContract
      */
     id?: string;
     /**
      * 
-     * @type {ContractDTO}
-     * @memberof SuperContractDTO
+     * @type {Contract}
+     * @memberof SuperContract
      */
-    drive?: ContractDTO;
+    drive?: Contract;
     /**
      * [Cid](https://github.com/multiformats/cid) (version 1) - special content identifier.
      * @type {string}
-     * @memberof SuperContractDTO
+     * @memberof SuperContract
      */
     file?: string;
     /**
      * 
      * @type {number}
-     * @memberof SuperContractDTO
+     * @memberof SuperContract
      */
     vmversion?: number;
     /**
      * 
      * @type {Array<string>}
-     * @memberof SuperContractDTO
+     * @memberof SuperContract
      */
     functions?: Array<string>;
 }
 
-export function SuperContractDTOFromJSON(json: any): SuperContractDTO {
-    return SuperContractDTOFromJSONTyped(json, false);
+export function SuperContractFromJSON(json: any): SuperContract {
+    return SuperContractFromJSONTyped(json, false);
 }
 
-export function SuperContractDTOFromJSONTyped(json: any, ignoreDiscriminator: boolean): SuperContractDTO {
+export function SuperContractFromJSONTyped(json: any, ignoreDiscriminator: boolean): SuperContract {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
         'id': !exists(json, 'id') ? undefined : json['id'],
-        'drive': !exists(json, 'drive') ? undefined : ContractDTOFromJSON(json['drive']),
+        'drive': !exists(json, 'drive') ? undefined : ContractFromJSON(json['drive']),
         'file': !exists(json, 'file') ? undefined : json['file'],
         'vmversion': !exists(json, 'vmversion') ? undefined : json['vmversion'],
         'functions': !exists(json, 'functions') ? undefined : json['functions'],
     };
 }
 
-export function SuperContractDTOToJSON(value?: SuperContractDTO | null): any {
+export function SuperContractToJSON(value?: SuperContract | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -86,7 +86,7 @@ export function SuperContractDTOToJSON(value?: SuperContractDTO | null): any {
     return {
         
         'id': value.id,
-        'drive': ContractDTOToJSON(value.drive),
+        'drive': ContractToJSON(value.drive),
         'file': value.file,
         'vmversion': value.vmversion,
         'functions': value.functions,

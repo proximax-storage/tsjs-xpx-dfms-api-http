@@ -16,13 +16,13 @@ import { exists, mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface ErrorDTO
+ * @interface ErrResult
  */
-export interface ErrorDTO {
+export interface ErrResult {
     /**
      * Error message
      * @type {string}
-     * @memberof ErrorDTO
+     * @memberof ErrResult
      */
     message?: string;
     /**
@@ -33,34 +33,34 @@ export interface ErrorDTO {
      * * 4 - Forbidden - is returned when the client doesn't have permission to
      *       perform the requested operation.
      * @type {number}
-     * @memberof ErrorDTO
+     * @memberof ErrResult
      */
-    code?: ErrorDTOCodeEnum;
+    code?: ErrResultCodeEnum;
     /**
      * 
      * @type {string}
-     * @memberof ErrorDTO
+     * @memberof ErrResult
      */
-    type?: ErrorDTOTypeEnum;
+    type?: ErrResultTypeEnum;
 }
 
-export function ErrorDTOFromJSON(json: any): ErrorDTO {
-    return ErrorDTOFromJSONTyped(json, false);
+export function ErrResultFromJSON(json: any): ErrResult {
+    return ErrResultFromJSONTyped(json, false);
 }
 
-export function ErrorDTOFromJSONTyped(json: any, ignoreDiscriminator: boolean): ErrorDTO {
+export function ErrResultFromJSONTyped(json: any, ignoreDiscriminator: boolean): ErrResult {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'message': !exists(json, 'message') ? undefined : json['message'],
-        'code': !exists(json, 'code') ? undefined : json['code'],
-        'type': !exists(json, 'type') ? undefined : json['type'],
+        'message': !exists(json, 'Message') ? undefined : json['Message'],
+        'code': !exists(json, 'Code') ? undefined : json['Code'],
+        'type': !exists(json, 'Type') ? undefined : json['Type'],
     };
 }
 
-export function ErrorDTOToJSON(value?: ErrorDTO | null): any {
+export function ErrResultToJSON(value?: ErrResult | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -69,9 +69,9 @@ export function ErrorDTOToJSON(value?: ErrorDTO | null): any {
     }
     return {
         
-        'message': value.message,
-        'code': value.code,
-        'type': value.type,
+        'Message': value.message,
+        'Code': value.code,
+        'Type': value.type,
     };
 }
 
@@ -79,7 +79,7 @@ export function ErrorDTOToJSON(value?: ErrorDTO | null): any {
 * @export
 * @enum {string}
 */
-export enum ErrorDTOCodeEnum {
+export enum ErrResultCodeEnum {
     NUMBER_0 = 0,
     NUMBER_1 = 1,
     NUMBER_2 = 2
@@ -88,7 +88,7 @@ export enum ErrorDTOCodeEnum {
 * @export
 * @enum {string}
 */
-export enum ErrorDTOTypeEnum {
+export enum ErrResultTypeEnum {
     Error = 'error'
 }
 

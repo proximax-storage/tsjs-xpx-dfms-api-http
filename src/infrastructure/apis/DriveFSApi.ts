@@ -15,72 +15,75 @@
 
 import * as runtime from '../runtime';
 import {
-    ErrorDTO,
-    ErrorDTOFromJSON,
-    ErrorDTOToJSON,
-    InlineResponse200,
-    InlineResponse200FromJSON,
-    InlineResponse200ToJSON,
-    StatDTO,
-    StatDTOFromJSON,
-    StatDTOToJSON,
+    CidWrap,
+    CidWrapFromJSON,
+    CidWrapToJSON,
+    ErrResult,
+    ErrResultFromJSON,
+    ErrResultToJSON,
+    StatListWrap,
+    StatListWrapFromJSON,
+    StatListWrapToJSON,
+    StatWrap,
+    StatWrapFromJSON,
+    StatWrapToJSON,
 } from '../models';
 
 export interface DriveAddRequest {
-    arg1: string;
-    arg4: string;
+    argDrive: string;
+    argDst: string;
     body: runtime.HTTPBody;
     flush?: boolean;
 }
 
 export interface DriveCpRequest {
-    arg1: string;
-    arg3: string;
-    arg4: string;
+    argDrive: string;
+    argSrc: string;
+    argDst: string;
     flush?: boolean;
 }
 
 export interface DriveFileRequest {
-    arg1: string;
-    arg5: string;
+    argDrive: string;
+    argFileCid: string;
 }
 
 export interface DriveFlushRequest {
-    arg1: string;
+    argDrive: string;
 }
 
 export interface DriveGetRequest {
-    arg1: string;
-    arg3: string;
+    argDrive: string;
+    argSrc: string;
 }
 
 export interface DriveLsRequest {
-    arg1: string;
-    arg3: string;
+    argDrive: string;
+    argSrc: string;
 }
 
 export interface DriveMkdirRequest {
-    arg1: string;
-    arg3: string;
+    argDrive: string;
+    argSrc: string;
     flush?: boolean;
 }
 
 export interface DriveMvRequest {
-    arg1: string;
-    arg3: string;
-    arg4: string;
+    argDrive: string;
+    argSrc: string;
+    argDst: string;
     flush?: boolean;
 }
 
 export interface DriveRmRequest {
-    arg1: string;
-    arg3: string;
+    argDrive: string;
+    argSrc: string;
     flush?: boolean;
 }
 
 export interface DriveStatRequest {
-    arg1: string;
-    arg3: string;
+    argDrive: string;
+    argSrc: string;
 }
 
 /**
@@ -89,21 +92,21 @@ export interface DriveStatRequest {
 export class DriveFSApi extends runtime.BaseAPI {
 
     /**
-     * Sends file or directory to remote node which adds it to the path of the contract
-     * Add file
+     * Adds to drive a new file/directory and sends it to remote nodes which
+     * Add a file/directory
      */
-    async driveAddRaw(requestParameters: DriveAddRequest): Promise<runtime.ApiResponse<InlineResponse200>> {
-        if (requestParameters.arg1 === null || requestParameters.arg1 === undefined) {
-            throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling driveAdd.');
+    async driveAddRaw(requestParameters: DriveAddRequest): Promise<runtime.ApiResponse<CidWrap>> {
+        if (requestParameters.argDrive === null || requestParameters.argDrive === undefined) {
+            throw new runtime.RequiredError('argDrive','Required parameter requestParameters.argDrive was null or undefined when calling driveAdd.');
         }
 
-        if (requestParameters.arg4 === null || requestParameters.arg4 === undefined) {
-            throw new runtime.RequiredError('arg4','Required parameter requestParameters.arg4 was null or undefined when calling driveAdd.');
+        if (requestParameters.argDst === null || requestParameters.argDst === undefined) {
+            throw new runtime.RequiredError('argDst','Required parameter requestParameters.argDst was null or undefined when calling driveAdd.');
         }
 
         const queryParameters: runtime.HTTPQuery = {};
 
-        queryParameters['arg'] = [ requestParameters.arg1, requestParameters.arg4 ];
+        queryParameters['arg'] = [ requestParameters.argDrive, requestParameters.argDst ];
 
         if (requestParameters.flush !== undefined) {
             queryParameters['flush'] = requestParameters.flush;
@@ -119,38 +122,38 @@ export class DriveFSApi extends runtime.BaseAPI {
             body: requestParameters.body,
         });
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => InlineResponse200FromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => CidWrapFromJSON(jsonValue));
     }
 
     /**
-     * Sends file or directory to remote node which adds it to the path of the contract
-     * Add file
+     * Adds to drive a new file/directory and sends it to remote nodes which
+     * Add a file/directory
      */
-    async driveAdd(requestParameters: DriveAddRequest): Promise<InlineResponse200> {
+    async driveAdd(requestParameters: DriveAddRequest): Promise<CidWrap> {
         const response = await this.driveAddRaw(requestParameters);
         return await response.value();
     }
 
     /**
-     * Copy copies file or directory from the givens source path to the given destination path It does not makes the full copy of the file or directory, it just copies the reference
+     * Copies a file/directory from a source path to a destination path It does not make the full copy of the file/directory, it just copies the reference
      * Copy file
      */
     async driveCpRaw(requestParameters: DriveCpRequest): Promise<runtime.ApiResponse<void>> {
-        if (requestParameters.arg1 === null || requestParameters.arg1 === undefined) {
-            throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling driveCp.');
+        if (requestParameters.argDrive === null || requestParameters.argDrive === undefined) {
+            throw new runtime.RequiredError('argDrive','Required parameter requestParameters.argDrive was null or undefined when calling driveCp.');
         }
 
-        if (requestParameters.arg3 === null || requestParameters.arg3 === undefined) {
-            throw new runtime.RequiredError('arg3','Required parameter requestParameters.arg3 was null or undefined when calling driveCp.');
+        if (requestParameters.argSrc === null || requestParameters.argSrc === undefined) {
+            throw new runtime.RequiredError('argSrc','Required parameter requestParameters.argSrc was null or undefined when calling driveCp.');
         }
 
-        if (requestParameters.arg4 === null || requestParameters.arg4 === undefined) {
-            throw new runtime.RequiredError('arg4','Required parameter requestParameters.arg4 was null or undefined when calling driveCp.');
+        if (requestParameters.argDst === null || requestParameters.argDst === undefined) {
+            throw new runtime.RequiredError('argDst','Required parameter requestParameters.argDst was null or undefined when calling driveCp.');
         }
 
         const queryParameters: runtime.HTTPQuery = {};
 
-        queryParameters['arg'] = [ requestParameters.arg1, requestParameters.arg3, requestParameters.arg4 ];
+        queryParameters['arg'] = [ requestParameters.argDrive, requestParameters.argSrc, requestParameters.argDst ];
 
         if (requestParameters.flush !== undefined) {
             queryParameters['flush'] = requestParameters.flush;
@@ -169,7 +172,7 @@ export class DriveFSApi extends runtime.BaseAPI {
     }
 
     /**
-     * Copy copies file or directory from the givens source path to the given destination path It does not makes the full copy of the file or directory, it just copies the reference
+     * Copies a file/directory from a source path to a destination path It does not make the full copy of the file/directory, it just copies the reference
      * Copy file
      */
     async driveCp(requestParameters: DriveCpRequest): Promise<void> {
@@ -177,21 +180,21 @@ export class DriveFSApi extends runtime.BaseAPI {
     }
 
     /**
-     * Gets file or directory from remote node
-     * Get file
+     * Returns a file from remote nodes or local store by CID
+     * Get file by CID
      */
     async driveFileRaw(requestParameters: DriveFileRequest): Promise<Response> {
-        if (requestParameters.arg1 === null || requestParameters.arg1 === undefined) {
-            throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling driveFile.');
+        if (requestParameters.argDrive === null || requestParameters.argDrive === undefined) {
+            throw new runtime.RequiredError('argDrive','Required parameter requestParameters.argDrive was null or undefined when calling driveFile.');
         }
 
-        if (requestParameters.arg5 === null || requestParameters.arg5 === undefined) {
-            throw new runtime.RequiredError('arg5','Required parameter requestParameters.arg5 was null or undefined when calling driveFile.');
+        if (requestParameters.argFileCid === null || requestParameters.argFileCid === undefined) {
+            throw new runtime.RequiredError('argFileCid','Required parameter requestParameters.argFileCid was null or undefined when calling driveFile.');
         }
 
         const queryParameters: runtime.HTTPQuery = {};
 
-        queryParameters['arg'] = [ requestParameters.arg1, requestParameters.arg5 ];
+        queryParameters['arg'] = [ requestParameters.argDrive, requestParameters.argFileCid ];
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -206,8 +209,8 @@ export class DriveFSApi extends runtime.BaseAPI {
     }
 
     /**
-     * Gets file or directory from the remote node
-     * Get file
+     * Returns a file from remote nodes or local store by CID
+     * Get file by CID
      */
     async driveFileAsText(requestParameters: DriveFileRequest): Promise<string> {
         const response = await this.driveFileRaw(requestParameters);
@@ -228,13 +231,13 @@ export class DriveFSApi extends runtime.BaseAPI {
      * Flush drive
      */
     async driveFlushRaw(requestParameters: DriveFlushRequest): Promise<runtime.ApiResponse<void>> {
-        if (requestParameters.arg1 === null || requestParameters.arg1 === undefined) {
-            throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling driveFlush.');
+        if (requestParameters.argDrive === null || requestParameters.argDrive === undefined) {
+            throw new runtime.RequiredError('argDrive','Required parameter requestParameters.argDrive was null or undefined when calling driveFlush.');
         }
 
         const queryParameters: runtime.HTTPQuery = {};
 
-        queryParameters['arg'] = requestParameters.arg1;
+        queryParameters['arg'] = requestParameters.argDrive;
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -257,21 +260,21 @@ export class DriveFSApi extends runtime.BaseAPI {
     }
 
     /**
-     * Sends file or directory to remote node which adds it to the path of the contract
-     * Get file
+     * Return a file/directory from remote nodes or local store by a path
+     * Get a file or dir by a path
      */
     async driveGetRaw(requestParameters: DriveGetRequest): Promise<Response> {
-        if (requestParameters.arg1 === null || requestParameters.arg1 === undefined) {
-            throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling driveGet.');
+        if (requestParameters.argDrive === null || requestParameters.argDrive === undefined) {
+            throw new runtime.RequiredError('argDrive','Required parameter requestParameters.argDrive was null or undefined when calling driveGet.');
         }
 
-        if (requestParameters.arg3 === null || requestParameters.arg3 === undefined) {
-            throw new runtime.RequiredError('arg3','Required parameter requestParameters.arg3 was null or undefined when calling driveGet.');
+        if (requestParameters.argSrc === null || requestParameters.argSrc === undefined) {
+            throw new runtime.RequiredError('argSrc','Required parameter requestParameters.argSrc was null or undefined when calling driveGet.');
         }
 
         const queryParameters: runtime.HTTPQuery = {};
 
-        queryParameters['arg'] = [ requestParameters.arg1, requestParameters.arg3 ];
+        queryParameters['arg'] = [ requestParameters.argDrive, requestParameters.argSrc ];
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -286,8 +289,8 @@ export class DriveFSApi extends runtime.BaseAPI {
     }
 
     /**
-     * Gets file or directory from the remote node
-     * Get file
+     * Return a file/directory from remote nodes or local store by a path
+     * Get a file or dir by a path
      */
     async driveGetAsText(requestParameters: DriveGetRequest): Promise<string> {
         const response = await this.driveGetRaw(requestParameters);
@@ -304,21 +307,21 @@ export class DriveFSApi extends runtime.BaseAPI {
     }
 
     /**
-     * Ls returns information about the files and directories under the given path
+     * Returns information about a file/directory by a given path
      * List files
      */
-    async driveLsRaw(requestParameters: DriveLsRequest): Promise<runtime.ApiResponse<Array<StatDTO>>> {
-        if (requestParameters.arg1 === null || requestParameters.arg1 === undefined) {
-            throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling driveLs.');
+    async driveLsRaw(requestParameters: DriveLsRequest): Promise<runtime.ApiResponse<StatListWrap>> {
+        if (requestParameters.argDrive === null || requestParameters.argDrive === undefined) {
+            throw new runtime.RequiredError('argDrive','Required parameter requestParameters.argDrive was null or undefined when calling driveLs.');
         }
 
-        if (requestParameters.arg3 === null || requestParameters.arg3 === undefined) {
-            throw new runtime.RequiredError('arg3','Required parameter requestParameters.arg3 was null or undefined when calling driveLs.');
+        if (requestParameters.argSrc === null || requestParameters.argSrc === undefined) {
+            throw new runtime.RequiredError('argSrc','Required parameter requestParameters.argSrc was null or undefined when calling driveLs.');
         }
 
         const queryParameters: runtime.HTTPQuery = {};
 
-        queryParameters['arg'] = [ requestParameters.arg1, requestParameters.arg3 ];
+        queryParameters['arg'] = [ requestParameters.argDrive, requestParameters.argSrc ];
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -329,34 +332,34 @@ export class DriveFSApi extends runtime.BaseAPI {
             query: queryParameters,
         });
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.List.map(StatDTOFromJSON));
+        return new runtime.JSONApiResponse(response, (jsonValue) => StatListWrapFromJSON(jsonValue));
     }
 
     /**
-     * Ls returns information about the files and directories under the given path
+     * Returns information about a file/directory by a given path
      * List files
      */
-    async driveLs(requestParameters: DriveLsRequest): Promise<Array<StatDTO>> {
+    async driveLs(requestParameters: DriveLsRequest): Promise<StatListWrap> {
         const response = await this.driveLsRaw(requestParameters);
         return await response.value();
     }
 
     /**
-     * MakeDir creates new directory on the given path
+     * Creates a new directory by a given path
      * Make directory
      */
     async driveMkdirRaw(requestParameters: DriveMkdirRequest): Promise<runtime.ApiResponse<void>> {
-        if (requestParameters.arg1 === null || requestParameters.arg1 === undefined) {
-            throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling driveMkdir.');
+        if (requestParameters.argDrive === null || requestParameters.argDrive === undefined) {
+            throw new runtime.RequiredError('argDrive','Required parameter requestParameters.argDrive was null or undefined when calling driveMkdir.');
         }
 
-        if (requestParameters.arg3 === null || requestParameters.arg3 === undefined) {
-            throw new runtime.RequiredError('arg3','Required parameter requestParameters.arg3 was null or undefined when calling driveMkdir.');
+        if (requestParameters.argSrc === null || requestParameters.argSrc === undefined) {
+            throw new runtime.RequiredError('argSrc','Required parameter requestParameters.argSrc was null or undefined when calling driveMkdir.');
         }
 
         const queryParameters: runtime.HTTPQuery = {};
 
-        queryParameters['arg'] = [ requestParameters.arg1, requestParameters.arg3 ];
+        queryParameters['arg'] = [ requestParameters.argDrive, requestParameters.argSrc ];
 
         if (requestParameters.flush !== undefined) {
             queryParameters['flush'] = requestParameters.flush;
@@ -375,7 +378,7 @@ export class DriveFSApi extends runtime.BaseAPI {
     }
 
     /**
-     * MakeDir creates new directory on the given path
+     * Creates a new directory by a given path
      * Make directory
      */
     async driveMkdir(requestParameters: DriveMkdirRequest): Promise<void> {
@@ -383,25 +386,25 @@ export class DriveFSApi extends runtime.BaseAPI {
     }
 
     /**
-     * Move moves file or directory from the givens source path to the given destination path Use also to rename file or directory
+     * Moves a file/directory from a source path to a destination path Use also to rename a file/directory
      * Move file
      */
     async driveMvRaw(requestParameters: DriveMvRequest): Promise<runtime.ApiResponse<void>> {
-        if (requestParameters.arg1 === null || requestParameters.arg1 === undefined) {
-            throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling driveMv.');
+        if (requestParameters.argDrive === null || requestParameters.argDrive === undefined) {
+            throw new runtime.RequiredError('argDrive','Required parameter requestParameters.argDrive was null or undefined when calling driveMv.');
         }
 
-        if (requestParameters.arg3 === null || requestParameters.arg3 === undefined) {
-            throw new runtime.RequiredError('arg3','Required parameter requestParameters.arg3 was null or undefined when calling driveMv.');
+        if (requestParameters.argSrc === null || requestParameters.argSrc === undefined) {
+            throw new runtime.RequiredError('argSrc','Required parameter requestParameters.argSrc was null or undefined when calling driveMv.');
         }
 
-        if (requestParameters.arg4 === null || requestParameters.arg4 === undefined) {
-            throw new runtime.RequiredError('arg4','Required parameter requestParameters.arg4 was null or undefined when calling driveMv.');
+        if (requestParameters.argDst === null || requestParameters.argDst === undefined) {
+            throw new runtime.RequiredError('argDst','Required parameter requestParameters.argDst was null or undefined when calling driveMv.');
         }
 
         const queryParameters: runtime.HTTPQuery = {};
 
-        queryParameters['arg'] = [ requestParameters.arg1, requestParameters.arg3, requestParameters.arg4 ];
+        queryParameters['arg'] = [ requestParameters.argDrive, requestParameters.argSrc, requestParameters.argDst ];
 
         if (requestParameters.flush !== undefined) {
             queryParameters['flush'] = requestParameters.flush;
@@ -420,7 +423,7 @@ export class DriveFSApi extends runtime.BaseAPI {
     }
 
     /**
-     * Move moves file or directory from the givens source path to the given destination path Use also to rename file or directory
+     * Moves a file/directory from a source path to a destination path Use also to rename a file/directory
      * Move file
      */
     async driveMv(requestParameters: DriveMvRequest): Promise<void> {
@@ -428,21 +431,21 @@ export class DriveFSApi extends runtime.BaseAPI {
     }
 
     /**
-     * Remove removes the file or directory from the path
+     * Removes a file/directory by a path
      * Remove file
      */
     async driveRmRaw(requestParameters: DriveRmRequest): Promise<runtime.ApiResponse<void>> {
-        if (requestParameters.arg1 === null || requestParameters.arg1 === undefined) {
-            throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling driveRm.');
+        if (requestParameters.argDrive === null || requestParameters.argDrive === undefined) {
+            throw new runtime.RequiredError('argDrive','Required parameter requestParameters.argDrive was null or undefined when calling driveRm.');
         }
 
-        if (requestParameters.arg3 === null || requestParameters.arg3 === undefined) {
-            throw new runtime.RequiredError('arg3','Required parameter requestParameters.arg3 was null or undefined when calling driveRm.');
+        if (requestParameters.argSrc === null || requestParameters.argSrc === undefined) {
+            throw new runtime.RequiredError('argSrc','Required parameter requestParameters.argSrc was null or undefined when calling driveRm.');
         }
 
         const queryParameters: runtime.HTTPQuery = {};
 
-        queryParameters['arg'] = [ requestParameters.arg1, requestParameters.arg3 ];
+        queryParameters['arg'] = [ requestParameters.argDrive, requestParameters.argSrc ];
 
         if (requestParameters.flush !== undefined) {
             queryParameters['flush'] = requestParameters.flush;
@@ -461,7 +464,7 @@ export class DriveFSApi extends runtime.BaseAPI {
     }
 
     /**
-     * Remove removes the file or directory from the path
+     * Removes a file/directory by a path
      * Remove file
      */
     async driveRm(requestParameters: DriveRmRequest): Promise<void> {
@@ -469,21 +472,21 @@ export class DriveFSApi extends runtime.BaseAPI {
     }
 
     /**
-     * Stat returns information about the file or directory under the given path
+     * Returns information about a file/directory by a given path
      * File information
      */
-    async driveStatRaw(requestParameters: DriveStatRequest): Promise<runtime.ApiResponse<StatDTO>> {
-        if (requestParameters.arg1 === null || requestParameters.arg1 === undefined) {
-            throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling driveStat.');
+    async driveStatRaw(requestParameters: DriveStatRequest): Promise<runtime.ApiResponse<StatWrap>> {
+        if (requestParameters.argDrive === null || requestParameters.argDrive === undefined) {
+            throw new runtime.RequiredError('argDrive','Required parameter requestParameters.argDrive was null or undefined when calling driveStat.');
         }
 
-        if (requestParameters.arg3 === null || requestParameters.arg3 === undefined) {
-            throw new runtime.RequiredError('arg3','Required parameter requestParameters.arg3 was null or undefined when calling driveStat.');
+        if (requestParameters.argSrc === null || requestParameters.argSrc === undefined) {
+            throw new runtime.RequiredError('argSrc','Required parameter requestParameters.argSrc was null or undefined when calling driveStat.');
         }
 
         const queryParameters: runtime.HTTPQuery = {};
 
-        queryParameters['arg'] = [ requestParameters.arg1, requestParameters.arg3 ];
+        queryParameters['arg'] = [ requestParameters.argDrive, requestParameters.argSrc ];
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -494,14 +497,14 @@ export class DriveFSApi extends runtime.BaseAPI {
             query: queryParameters,
         });
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => StatDTOFromJSON(jsonValue.Stat));
+        return new runtime.JSONApiResponse(response, (jsonValue) => StatWrapFromJSON(jsonValue));
     }
 
     /**
-     * Stat returns information about the file or directory under the given path
+     * Returns information about a file/directory by a given path
      * File information
      */
-    async driveStat(requestParameters: DriveStatRequest): Promise<StatDTO> {
+    async driveStat(requestParameters: DriveStatRequest): Promise<StatWrap> {
         const response = await this.driveStatRaw(requestParameters);
         return await response.value();
     }

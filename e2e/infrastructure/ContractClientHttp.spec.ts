@@ -2,7 +2,7 @@ import { deepEqual } from 'assert';
 import { assert, expect } from 'chai';
 import { ContractClientHttp } from '../../src/infrastructure/ContractClientHttp';
 import { ContractReplicatorHttp, DriveFsHttp, NetworkHttp } from '../../src/infrastructure/infrastructure';
-import { InviteDTO } from '../../src/infrastructure';
+import { Contract, InviteWrap, Peer, SuperContract } from '../../src/infrastructure';
 import { createReadStream, readFileSync } from 'fs';
 import { timer } from 'rxjs';
 import { SuperContractHttp } from '../../src/infrastructure/SuperContractHttp';
@@ -148,9 +148,9 @@ describe('ContractClientHttp', () => {
             contractClientHttp.ls()
                 .subscribe((contracts) => {
                     expect(contracts).not.to.be.undefined;
-                    expect(contracts[0].drive).not.to.be.undefined;
+                    expect(contracts[0]).not.to.be.undefined;
                     // save drive for following test
-                    someCID = contracts[0].drive as string;
+                    someCID = contracts[0] as string;
                     done();
                 });
         });
@@ -180,7 +180,7 @@ describe('ContractClientHttp', () => {
 
     //    {'Invite':{'drive':'baegaajaiaqjcbp75vb6q3dt2sxg7w4pyzde72ts3fpxiijnnqva4wk35zqoclfb4','owner':'080412200eb448d07c7ccb312989ac27aa052738ff589e2f83973f909b506b450dc5c4e2','duration':18,'space':1,'payedReplicas':3,'minReplicators':3,'percentApprovers':66,'billingPrice':3,'billingPeriod':6}}
 
-    let acceptedInvite: InviteDTO;
+    let acceptedInvite: Contract;
     describe('compose', () => {
 
         /*
@@ -251,7 +251,7 @@ describe('ContractClientHttp', () => {
                 subAccepted3.unsubscribe();
             });
 
-            const subCompose = contractClientHttp.compose(1000000, 3600, 3, 3, 100, 10, 66, undefined).subscribe((contract) => {
+            const subCompose = contractClientHttp.compose(1000000, '3600s', 3, 3, 100, 10, 66, undefined).subscribe((contract) => {
                 console.log(contract);
                 expect(contract).not.to.be.undefined;
                 expect(contract.drive).to.be.equal(acceptedInvite.drive);
@@ -322,12 +322,12 @@ describe('ContractClientHttp', () => {
         })
 
         it('should get the supercontract', (done) => {
-            supercontractHttp.get(scID).subscribe(superContractDTO => {
-                expect(superContractDTO.id).to.be.equal(scID);
-                expect(superContractDTO.file).to.be.equal(helloWorldCID);
-                expect((superContractDTO.drive as any).drive).to.be.equal(driveCID);
-                expect(superContractDTO.vmversion).to.be.gte(1);
-                // expect(superContractDTO.functions).not.to.be.undefined; // TODO: re-enable, once we have a sc with some fn
+            supercontractHttp.get(scID).subscribe(supercontract => {
+                expect(supercontract.id).to.be.equal(scID);
+                expect(supercontract.file).to.be.equal(helloWorldCID);
+                expect((supercontract.drive as any).drive).to.be.equal(driveCID);
+                expect(supercontract.vmversion).to.be.gte(1);
+                // expect(supercontract.functions).not.to.be.undefined; // TODO: re-enable, once we have a sc with some fn
                 done();
             });
         });
