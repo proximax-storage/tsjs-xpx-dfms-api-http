@@ -71,7 +71,8 @@ export class BaseAPI {
             method: context.method,
             headers: headers,
             body,
-            credentials: this.configuration.credentials
+            credentials: this.configuration.credentials,
+            signal: context.signal
         };
         return { url, init };
     }
@@ -212,6 +213,7 @@ export interface RequestOpts {
     headers: HTTPHeaders;
     query?: HTTPQuery;
     body?: HTTPBody;
+    signal?: AbortSignal;
 }
 
 export function exists(json: any, key: string) {

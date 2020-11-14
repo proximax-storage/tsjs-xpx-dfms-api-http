@@ -15,22 +15,27 @@
 
 import * as runtime from '../runtime';
 import {
-    ContractDTO,
-    ContractDTOFromJSON,
-    ContractDTOToJSON,
-    ErrorDTO,
-    ErrorDTOFromJSON,
-    ErrorDTOToJSON,
-    InviteDTO,
-    InviteDTOFromJSON,
-    InviteDTOToJSON,
-    VerifyResultDTO,
-    VerifyResultDTOFromJSON,
-    VerifyResultDTOToJSON,
+    CidListWrap,
+    CidListWrapFromJSON,
+    CidListWrapToJSON,
+    ContractWrap,
+    ContractWrapFromJSON,
+    ContractWrapToJSON,
+    ErrResult,
+    ErrResultFromJSON,
+    ErrResultToJSON,
+    InviteWrap,
+    InviteWrapFromJSON,
+    InviteWrapToJSON,
+    VerifyResult,
+    VerifyResultFromJSON,
+    VerifyResultToJSON,
 } from '../models';
 
+import { AbortController } from 'abort-controller';
+
 export interface AcceptRequest {
-    arg1: string;
+    argDrive: string;
 }
 // same ifcs already exported by ContractClientApi - comment it out here and import it instead
 import {
@@ -40,15 +45,16 @@ import {
     GetContractRequest,
     VerifyRequest
 } from './';
+import { Observable } from 'rxjs';
 
 /*
 export interface AmmendsRequest {
-    arg1: string;
+    argDrive: string;
 }
 
 export interface ComposeRequest {
-    space: number;
-    subPeriod: number;
+    argSpace: number;
+    argDuration: string;
     replicas?: number;
     minReplicators?: number;
     subscriptionPrice?: number;
@@ -58,15 +64,15 @@ export interface ComposeRequest {
 }
 
 export interface FinishRequest {
-    arg1: string;
+    argDrive: string;
 }
 
 export interface GetContractRequest {
-    arg1: string;
+    argDrive: string;
 }
 
 export interface VerifyRequest {
-    arg1: string;
+    argDrive: string;
 }
 */
 
@@ -80,15 +86,13 @@ export class ContractReplicatorApi extends runtime.BaseAPI {
      * Accept joins contract
      */
     async acceptRaw(requestParameters: AcceptRequest): Promise<runtime.ApiResponse<void>> {
-        if (requestParameters.arg1 === null || requestParameters.arg1 === undefined) {
-            throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling accept.');
+        if (requestParameters.argDrive === null || requestParameters.argDrive === undefined) {
+            throw new runtime.RequiredError('argDrive','Required parameter requestParameters.argDrive was null or undefined when calling accept.');
         }
 
         const queryParameters: runtime.HTTPQuery = {};
 
-        if (requestParameters.arg1 !== undefined) {
-            queryParameters['arg'] = requestParameters.arg1;
-        }
+        queryParameters['arg'] = requestParameters.argDrive;
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -111,10 +115,14 @@ export class ContractReplicatorApi extends runtime.BaseAPI {
     }
 
     /**
-     * Returns subscription for accepted contracts by the node.
+     * Establishes persitent connection and sends json value through it to the requester as long as new updates appear.
      * Show accepted contracts
      */
-    async acceptedRaw(): Promise<runtime.ApiResponse<Array<ContractDTO>>> {
+    async acceptedRaw(): Promise<{response: Response, abortController: AbortController}> {
+    // async acceptedRaw(): Promise<runtime.ApiResponse<ContractWrap>> {
+        const abortController = new AbortController();
+        const signal = abortController.signal;
+
         const queryParameters: runtime.HTTPQuery = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -124,34 +132,40 @@ export class ContractReplicatorApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
+            signal: signal
         });
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(ContractDTOFromJSON));
+        return {response, abortController};
+        // return new runtime.JSONApiResponse(response, (jsonValue) => ContractWrapFromJSON(jsonValue));
     }
 
     /**
-     * Returns subscription for accepted contracts by the node.
+     * Establishes persitent connection and sends json value through it to the requester as long as new updates appear.
      * Show accepted contracts
      */
-    async accepted(): Promise<Array<ContractDTO>> {
+    async accepted(): Promise<ContractWrap> {
         const response = await this.acceptedRaw();
-        return await response.value();
+        return new runtime.JSONApiResponse(response.response, (jsonValue) => ContractWrapFromJSON(jsonValue)).value();
+        // return await response.value();
+    }
+
+    async acceptedAsStream(): Promise<ReadableStream<Uint8Array> | null> {
+        const response = await this.acceptedRaw();
+        return response.response.body;
     }
 
     /**
      * Creates subscription for Drive Contract updates/corrections of any contract from the network by ID.
      * Ammendments subscription
      */
-    async ammendsRaw(requestParameters: AmmendsRequest): Promise<runtime.ApiResponse<Array<ContractDTO>>> {
-        if (requestParameters.arg1 === null || requestParameters.arg1 === undefined) {
-            throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling ammends.');
+    async ammendsRaw(requestParameters: AmmendsRequest): Promise<runtime.ApiResponse<ContractWrap>> {
+        if (requestParameters.argDrive === null || requestParameters.argDrive === undefined) {
+            throw new runtime.RequiredError('argDrive','Required parameter requestParameters.argDrive was null or undefined when calling ammends.');
         }
 
         const queryParameters: runtime.HTTPQuery = {};
 
-        if (requestParameters.arg1 !== undefined) {
-            queryParameters['arg'] = requestParameters.arg1;
-        }
+        queryParameters['arg'] = requestParameters.argDrive;
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -162,14 +176,14 @@ export class ContractReplicatorApi extends runtime.BaseAPI {
             query: queryParameters,
         });
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(ContractDTOFromJSON));
+        return new runtime.JSONApiResponse(response, (jsonValue) => ContractWrapFromJSON(jsonValue));
     }
 
     /**
      * Creates subscription for Drive Contract updates/corrections of any contract from the network by ID.
      * Ammendments subscription
      */
-    async ammends(requestParameters: AmmendsRequest): Promise<Array<ContractDTO>> {
+    async ammends(requestParameters: AmmendsRequest): Promise<ContractWrap> {
         const response = await this.ammendsRaw(requestParameters);
         return await response.value();
     }
@@ -178,24 +192,18 @@ export class ContractReplicatorApi extends runtime.BaseAPI {
      * Compose synchronously announces invites to the Network with current node as an owner and tries to find members which agrees on specified parameters and options. It does not guarantee success on resolving members. On success persists contract locally and gives ability to use DriveFS.
      * Creates new Drive contract
      */
-    async composeRaw(requestParameters: ComposeRequest): Promise<runtime.ApiResponse<ContractDTO>> {
-        if (requestParameters.space === null || requestParameters.space === undefined) {
-            throw new runtime.RequiredError('space','Required parameter requestParameters.space was null or undefined when calling compose.');
+    async composeRaw(requestParameters: ComposeRequest): Promise<runtime.ApiResponse<ContractWrap>> {
+        if (requestParameters.argSpace === null || requestParameters.argSpace === undefined) {
+            throw new runtime.RequiredError('argSpace','Required parameter requestParameters.argSpace was null or undefined when calling compose.');
         }
 
-        if (requestParameters.subPeriod === null || requestParameters.subPeriod === undefined) {
-            throw new runtime.RequiredError('subPeriod','Required parameter requestParameters.subPeriod was null or undefined when calling compose.');
+        if (requestParameters.argDuration === null || requestParameters.argDuration === undefined) {
+            throw new runtime.RequiredError('argDuration','Required parameter requestParameters.argDuration was null or undefined when calling compose.');
         }
 
         const queryParameters: runtime.HTTPQuery = {};
 
-        if (requestParameters.space !== undefined) {
-            queryParameters['space'] = requestParameters.space;
-        }
-
-        if (requestParameters.subPeriod !== undefined) {
-            queryParameters['subPeriod'] = requestParameters.subPeriod;
-        }
+        queryParameters['arg'] = [ requestParameters.argSpace, requestParameters.argDuration ];
 
         if (requestParameters.replicas !== undefined) {
             queryParameters['replicas'] = requestParameters.replicas;
@@ -230,14 +238,14 @@ export class ContractReplicatorApi extends runtime.BaseAPI {
             query: queryParameters,
         });
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ContractDTOFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => ContractWrapFromJSON(jsonValue));
     }
 
     /**
      * Compose synchronously announces invites to the Network with current node as an owner and tries to find members which agrees on specified parameters and options. It does not guarantee success on resolving members. On success persists contract locally and gives ability to use DriveFS.
      * Creates new Drive contract
      */
-    async compose(requestParameters: ComposeRequest): Promise<ContractDTO> {
+    async compose(requestParameters: ComposeRequest): Promise<ContractWrap> {
         const response = await this.composeRaw(requestParameters);
         return await response.value();
     }
@@ -247,15 +255,13 @@ export class ContractReplicatorApi extends runtime.BaseAPI {
      * Finish contract
      */
     async finishRaw(requestParameters: FinishRequest): Promise<runtime.ApiResponse<void>> {
-        if (requestParameters.arg1 === null || requestParameters.arg1 === undefined) {
-            throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling finish.');
+        if (requestParameters.argDrive === null || requestParameters.argDrive === undefined) {
+            throw new runtime.RequiredError('argDrive','Required parameter requestParameters.argDrive was null or undefined when calling finish.');
         }
 
         const queryParameters: runtime.HTTPQuery = {};
 
-        if (requestParameters.arg1 !== undefined) {
-            queryParameters['arg'] = requestParameters.arg1;
-        }
+        queryParameters['arg'] = requestParameters.argDrive;
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -281,16 +287,14 @@ export class ContractReplicatorApi extends runtime.BaseAPI {
      * Searches for Drive Contract information over the network.
      * Get Drive contract infromation
      */
-    async getContractRaw(requestParameters: GetContractRequest): Promise<runtime.ApiResponse<ContractDTO>> {
-        if (requestParameters.arg1 === null || requestParameters.arg1 === undefined) {
-            throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling getContract.');
+    async getContractRaw(requestParameters: GetContractRequest): Promise<runtime.ApiResponse<ContractWrap>> {
+        if (requestParameters.argDrive === null || requestParameters.argDrive === undefined) {
+            throw new runtime.RequiredError('argDrive','Required parameter requestParameters.argDrive was null or undefined when calling getContract.');
         }
 
         const queryParameters: runtime.HTTPQuery = {};
 
-        if (requestParameters.arg1 !== undefined) {
-            queryParameters['arg'] = requestParameters.arg1;
-        }
+        queryParameters['arg'] = requestParameters.argDrive;
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -301,14 +305,14 @@ export class ContractReplicatorApi extends runtime.BaseAPI {
             query: queryParameters,
         });
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ContractDTOFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => ContractWrapFromJSON(jsonValue));
     }
 
     /**
      * Searches for Drive Contract information over the network.
      * Get Drive contract infromation
      */
-    async getContract(requestParameters: GetContractRequest): Promise<ContractDTO> {
+    async getContract(requestParameters: GetContractRequest): Promise<ContractWrap> {
         const response = await this.getContractRaw(requestParameters);
         return await response.value();
     }
@@ -317,7 +321,12 @@ export class ContractReplicatorApi extends runtime.BaseAPI {
      * Creates subscription for new contract invitations. Main use case is to have external contract acceptance logic.
      * Subscribe to new contracts
      */
-    async invitesRaw(): Promise<runtime.ApiResponse<Array<InviteDTO>>> {
+    async invitesRaw(): Promise<{response: Response, abortController: AbortController}> {
+    // async invitesRaw(): Promise<runtime.ApiResponse<InviteWrap>> {
+
+        const abortController = new AbortController();
+        const signal = abortController.signal;
+
         const queryParameters: runtime.HTTPQuery = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -327,25 +336,33 @@ export class ContractReplicatorApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
+            signal: signal
         });
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(InviteDTOFromJSON));
+        return {response, abortController};
+        // return new runtime.JSONApiResponse(response, (jsonValue) => InviteWrapFromJSON(jsonValue));
     }
 
     /**
      * Creates subscription for new contract invitations. Main use case is to have external contract acceptance logic.
      * Subscribe to new contracts
      */
-    async invites(): Promise<Array<InviteDTO>> {
+    async invites(): Promise<InviteWrap> {
         const response = await this.invitesRaw();
-        return await response.value();
+        return new runtime.JSONApiResponse(response.response, (jsonValue) => InviteWrapFromJSON(jsonValue)).value();
+        // return await response.value();
+    }
+
+    async invitesAsStream(): Promise<ReadableStream<Uint8Array> | null> {
+        const response = await this.invitesRaw();
+        return response.response.body;
     }
 
     /**
      * Lists all the contracts in which Node participates as an owner or a member
      * List Drive contracts node aware of
      */
-    async lsRaw(): Promise<runtime.ApiResponse<Array<ContractDTO>>> {
+    async lsRaw(): Promise<runtime.ApiResponse<CidListWrap>> {
         const queryParameters: runtime.HTTPQuery = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -357,14 +374,14 @@ export class ContractReplicatorApi extends runtime.BaseAPI {
             query: queryParameters,
         });
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(ContractDTOFromJSON));
+        return new runtime.JSONApiResponse(response, (jsonValue) => CidListWrapFromJSON(jsonValue));
     }
 
     /**
      * Lists all the contracts in which Node participates as an owner or a member
      * List Drive contracts node aware of
      */
-    async ls(): Promise<Array<ContractDTO>> {
+    async ls(): Promise<CidListWrap> {
         const response = await this.lsRaw();
         return await response.value();
     }
@@ -373,16 +390,14 @@ export class ContractReplicatorApi extends runtime.BaseAPI {
      * Initiates verification round between replicators.
      * Contract verify
      */
-    async verifyRaw(requestParameters: VerifyRequest): Promise<runtime.ApiResponse<Array<VerifyResultDTO>>> {
-        if (requestParameters.arg1 === null || requestParameters.arg1 === undefined) {
-            throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling verify.');
+    async verifyRaw(requestParameters: VerifyRequest): Promise<runtime.ApiResponse<Array<VerifyResult>>> {
+        if (requestParameters.argDrive === null || requestParameters.argDrive === undefined) {
+            throw new runtime.RequiredError('argDrive','Required parameter requestParameters.argDrive was null or undefined when calling verify.');
         }
 
         const queryParameters: runtime.HTTPQuery = {};
 
-        if (requestParameters.arg1 !== undefined) {
-            queryParameters['arg'] = requestParameters.arg1;
-        }
+        queryParameters['arg'] = requestParameters.argDrive;
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -393,14 +408,14 @@ export class ContractReplicatorApi extends runtime.BaseAPI {
             query: queryParameters,
         });
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(VerifyResultDTOFromJSON));
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(VerifyResultFromJSON));
     }
 
     /**
      * Initiates verification round between replicators.
      * Contract verify
      */
-    async verify(requestParameters: VerifyRequest): Promise<Array<VerifyResultDTO>> {
+    async verify(requestParameters: VerifyRequest): Promise<Array<VerifyResult>> {
         const response = await this.verifyRaw(requestParameters);
         return await response.value();
     }

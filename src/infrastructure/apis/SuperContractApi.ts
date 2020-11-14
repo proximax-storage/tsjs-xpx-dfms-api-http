@@ -15,43 +15,55 @@
 
 import * as runtime from '../runtime';
 import {
-    ErrorDTO,
-    ErrorDTOFromJSON,
-    ErrorDTOToJSON,
-    SuperContractDTO,
-    SuperContractDTOFromJSON,
-    SuperContractDTOToJSON,
+    CidListWrap,
+    CidListWrapFromJSON,
+    CidListWrapToJSON,
+    CidResultWrap,
+    CidResultWrapFromJSON,
+    CidResultWrapToJSON,
+    ErrResult,
+    ErrResultFromJSON,
+    ErrResultToJSON,
+    ExecutionsWrap,
+    ExecutionsWrapFromJSON,
+    ExecutionsWrapToJSON,
+    ResultsWrap,
+    ResultsWrapFromJSON,
+    ResultsWrapToJSON,
+    SuperContractWrap,
+    SuperContractWrapFromJSON,
+    SuperContractWrapToJSON,
+    SupercontractExec,
+    SupercontractExecFromJSON,
+    SupercontractExecToJSON,
 } from '../models';
 
 export interface DeactivateRequest {
-    arg1: string;
+    argScId: string;
 }
 
 export interface DeployRequest {
-    arg1: string;
+    argDrive: string;
+    argSrc: string;
 }
 
 export interface ExecuteRequest {
-    arg1: string;
-    gas: number;
-    funName: string;
-    params?: Array<string>;
-}
-
-export interface ExecutionsRequest {
-    arg1: string;
+    argScId: string;
+    argGas: number;
+    argFuncName: string;
+    argArgsArray?: Array<string>;
 }
 
 export interface GetSCRequest {
-    arg1: string;
+    argScId: string;
 }
 
 export interface LsSCRequest {
-    arg1: string;
+    argDrive: string;
 }
 
 export interface ResultsRequest {
-    arg1: string;
+    argTxId: string;
 }
 
 /**
@@ -60,24 +72,22 @@ export interface ResultsRequest {
 export class SuperContractApi extends runtime.BaseAPI {
 
     /**
-     * Deactivate some SuperContract by its ID.
-     * Deactivate SuperContract
+     * Deactivate a SuperContract by its ID.
+     * Deactivate a SuperContract
      */
     async deactivateRaw(requestParameters: DeactivateRequest): Promise<runtime.ApiResponse<void>> {
-        if (requestParameters.arg1 === null || requestParameters.arg1 === undefined) {
-            throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling deactivate.');
+        if (requestParameters.argScId === null || requestParameters.argScId === undefined) {
+            throw new runtime.RequiredError('argScId','Required parameter requestParameters.argScId was null or undefined when calling deactivate.');
         }
 
         const queryParameters: runtime.HTTPQuery = {};
 
-        if (requestParameters.arg1 !== undefined) {
-            queryParameters['arg'] = requestParameters.arg1;
-        }
+        queryParameters['arg'] = requestParameters.argScId;
 
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
-            path: `/supercontract/deactivate`,
+            path: `/sc/deactivate`,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
@@ -87,245 +97,223 @@ export class SuperContractApi extends runtime.BaseAPI {
     }
 
     /**
-     * Deactivate some SuperContract by its ID.
-     * Deactivate SuperContract
+     * Deactivate a SuperContract by its ID.
+     * Deactivate a SuperContract
      */
     async deactivate(requestParameters: DeactivateRequest): Promise<void> {
         await this.deactivateRaw(requestParameters);
     }
 
     /**
-     * Deploy a new SuperContract by file hash. Return the SuperContract ID.
-     * Deploy a supercontract
+     * Deploy a new SuperContract by a file path. Return the SuperContract ID.
+     * Deploy a SuperContract
      */
-    async deployRaw(requestParameters: DeployRequest): Promise<runtime.ApiResponse<string>> {
-        if (requestParameters.arg1 === null || requestParameters.arg1 === undefined) {
-            throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling deploy.');
+    async deployRaw(requestParameters: DeployRequest): Promise<runtime.ApiResponse<CidResultWrap>> {
+        if (requestParameters.argDrive === null || requestParameters.argDrive === undefined) {
+            throw new runtime.RequiredError('argDrive','Required parameter requestParameters.argDrive was null or undefined when calling deploy.');
+        }
+
+        if (requestParameters.argSrc === null || requestParameters.argSrc === undefined) {
+            throw new runtime.RequiredError('argSrc','Required parameter requestParameters.argSrc was null or undefined when calling deploy.');
         }
 
         const queryParameters: runtime.HTTPQuery = {};
 
-        if (requestParameters.arg1 !== undefined) {
-            queryParameters['arg'] = requestParameters.arg1;
-        }
+        queryParameters['arg'] = [requestParameters.argDrive, requestParameters.argSrc];
 
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
-            path: `/supercontract/deploy`,
+            path: `/sc/deploy`,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
         });
 
-        return new runtime.TextApiResponse(response) as any;
+        return new runtime.JSONApiResponse(response, (jsonValue) => CidResultWrapFromJSON(jsonValue));
     }
 
     /**
-     * Deploy a new SuperContract by file hash. Return the SuperContract ID.
-     * Deploy a supercontract
+     * Deploy a new SuperContract by a file path. Return the SuperContract ID.
+     * Deploy a SuperContract
      */
-    async deploy(requestParameters: DeployRequest): Promise<string> {
+    async deploy(requestParameters: DeployRequest): Promise<CidResultWrap> {
         const response = await this.deployRaw(requestParameters);
         return await response.value();
     }
 
     /**
-     * Start execution of a supercontract. Return the Transaction ID.
-     * Execute a supercontract
+     * Start execution of a SuperContract. Return the Transaction ID.
+     * Execute a SuperContract
      */
-    async executeRaw(requestParameters: ExecuteRequest): Promise<runtime.ApiResponse<string>> {
-        if (requestParameters.arg1 === null || requestParameters.arg1 === undefined) {
-            throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling execute.');
+    async executeRaw(requestParameters: ExecuteRequest): Promise<runtime.ApiResponse<SupercontractExec>> {
+        if (requestParameters.argScId === null || requestParameters.argScId === undefined) {
+            throw new runtime.RequiredError('argScId','Required parameter requestParameters.argScId was null or undefined when calling execute.');
         }
 
-        if (requestParameters.gas === null || requestParameters.gas === undefined) {
-            throw new runtime.RequiredError('gas','Required parameter requestParameters.gas was null or undefined when calling execute.');
+        if (requestParameters.argGas === null || requestParameters.argGas === undefined) {
+            throw new runtime.RequiredError('argGas','Required parameter requestParameters.argGas was null or undefined when calling execute.');
         }
 
-        if (requestParameters.funName === null || requestParameters.funName === undefined) {
-            throw new runtime.RequiredError('funName','Required parameter requestParameters.funName was null or undefined when calling execute.');
+        if (requestParameters.argFuncName === null || requestParameters.argFuncName === undefined) {
+            throw new runtime.RequiredError('argFuncName','Required parameter requestParameters.argFuncName was null or undefined when calling execute.');
         }
 
         const queryParameters: runtime.HTTPQuery = {};
 
-        if (requestParameters.arg1 !== undefined) {
-            queryParameters['arg'] = requestParameters.arg1;
-        }
+        queryParameters['arg'] = [ requestParameters.argScId, requestParameters.argGas, requestParameters.argFuncName ];
 
-        if (requestParameters.gas !== undefined) {
-            queryParameters['gas'] = requestParameters.gas;
-        }
-
-        if (requestParameters.funName !== undefined) {
-            queryParameters['funName'] = requestParameters.funName;
-        }
-
-        if (requestParameters.params) {
-            queryParameters['params'] = requestParameters.params;
+        if (requestParameters.argArgsArray) {
+            queryParameters['params'] = requestParameters.argArgsArray;
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
-            path: `/supercontract/execute`,
+            path: `/sc/exec`,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
         });
 
-        return new runtime.TextApiResponse(response) as any;
+        return new runtime.JSONApiResponse(response, (jsonValue) => SupercontractExecFromJSON(jsonValue));
     }
 
     /**
-     * Start execution of a supercontract. Return the Transaction ID.
-     * Execute a supercontract
+     * Start execution of a SuperContract. Return the Transaction ID.
+     * Execute a SuperContract
      */
-    async execute(requestParameters: ExecuteRequest): Promise<string> {
+    async execute(requestParameters: ExecuteRequest): Promise<SupercontractExec> {
         const response = await this.executeRaw(requestParameters);
         return await response.value();
     }
 
     /**
-     * Get all execution results by SuperContract ID. Returns CID of results.
-     * Executions results
+     * Get all execution results started by a node. Returns Transaction IDs.
+     * Execution results
      */
-    async executionsRaw(requestParameters: ExecutionsRequest): Promise<runtime.ApiResponse<Array<string>>> {
-        if (requestParameters.arg1 === null || requestParameters.arg1 === undefined) {
-            throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling executions.');
-        }
-
+    async executionsRaw(): Promise<runtime.ApiResponse<ExecutionsWrap>> {
         const queryParameters: runtime.HTTPQuery = {};
-
-        if (requestParameters.arg1 !== undefined) {
-            queryParameters['arg'] = requestParameters.arg1;
-        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
-            path: `/supercontract/executions`,
+            path: `/sc/executions`,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
         });
 
-        return new runtime.JSONApiResponse<any>(response);
+        return new runtime.JSONApiResponse(response, (jsonValue) => ExecutionsWrapFromJSON(jsonValue));
     }
 
     /**
-     * Get all execution results by SuperContract ID. Returns CID of results.
-     * Executions results
+     * Get all execution results started by a node. Returns Transaction IDs.
+     * Execution results
      */
-    async executions(requestParameters: ExecutionsRequest): Promise<Array<string>> {
-        const response = await this.executionsRaw(requestParameters);
+    async executions(): Promise<ExecutionsWrap> {
+        const response = await this.executionsRaw();
         return await response.value();
     }
 
     /**
-     * Get a supercontract by ID.
-     * Get a supercontract
+     * Get a SuperContract by ID.
+     * Get a SuperContract
      */
-    async getSCRaw(requestParameters: GetSCRequest): Promise<runtime.ApiResponse<SuperContractDTO>> {
-        if (requestParameters.arg1 === null || requestParameters.arg1 === undefined) {
-            throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling getSC.');
+    async getSCRaw(requestParameters: GetSCRequest): Promise<runtime.ApiResponse<SuperContractWrap>> {
+        if (requestParameters.argScId === null || requestParameters.argScId === undefined) {
+            throw new runtime.RequiredError('argScId','Required parameter requestParameters.argScId was null or undefined when calling getSC.');
         }
 
         const queryParameters: runtime.HTTPQuery = {};
 
-        if (requestParameters.arg1 !== undefined) {
-            queryParameters['arg'] = requestParameters.arg1;
-        }
+        queryParameters['arg'] = requestParameters.argScId;
 
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
-            path: `/supercontract/get`,
+            path: `/sc/get`,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
         });
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => SuperContractDTOFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => SuperContractWrapFromJSON(jsonValue));
     }
 
     /**
-     * Get a supercontract by ID.
-     * Get a supercontract
+     * Get a SuperContract by ID.
+     * Get a SuperContract
      */
-    async getSC(requestParameters: GetSCRequest): Promise<SuperContractDTO> {
+    async getSC(requestParameters: GetSCRequest): Promise<SuperContractWrap> {
         const response = await this.getSCRaw(requestParameters);
         return await response.value();
     }
 
     /**
-     * Get all drive SuperContects.
-     * Get SuperContects
+     * Get all SuperContract on a drive.
+     * Get SuperContracts IDs
      */
-    async lsSCRaw(requestParameters: LsSCRequest): Promise<runtime.ApiResponse<Array<string>>> {
-        if (requestParameters.arg1 === null || requestParameters.arg1 === undefined) {
-            throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling lsSC.');
+    async lsSCRaw(requestParameters: LsSCRequest): Promise<runtime.ApiResponse<CidListWrap>> {
+        if (requestParameters.argDrive === null || requestParameters.argDrive === undefined) {
+            throw new runtime.RequiredError('argDrive','Required parameter requestParameters.argDrive was null or undefined when calling lsSC.');
         }
 
         const queryParameters: runtime.HTTPQuery = {};
 
-        if (requestParameters.arg1 !== undefined) {
-            queryParameters['arg'] = requestParameters.arg1;
-        }
+        queryParameters['arg'] = requestParameters.argDrive;
 
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
-            path: `/supercontract/ls`,
+            path: `/sc/ls`,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
         });
 
-        return new runtime.JSONApiResponse<any>(response);
+        return new runtime.JSONApiResponse(response, (jsonValue) => CidListWrapFromJSON(jsonValue));
     }
 
     /**
-     * Get all drive SuperContects.
-     * Get SuperContects
+     * Get all SuperContract on a drive.
+     * Get SuperContracts IDs
      */
-    async lsSC(requestParameters: LsSCRequest): Promise<Array<string>> {
+    async lsSC(requestParameters: LsSCRequest): Promise<CidListWrap> {
         const response = await this.lsSCRaw(requestParameters);
         return await response.value();
     }
 
     /**
-     * Get results of a Supercontract by its ID.
-     * Results of a Supercontract
+     * Get results of a SuperContract execution by its TxID.
+     * Results of a SuperContract execution
      */
-    async resultsRaw(requestParameters: ResultsRequest): Promise<runtime.ApiResponse<Array<string>>> {
-        if (requestParameters.arg1 === null || requestParameters.arg1 === undefined) {
-            throw new runtime.RequiredError('arg1','Required parameter requestParameters.arg1 was null or undefined when calling results.');
+    async resultsRaw(requestParameters: ResultsRequest): Promise<runtime.ApiResponse<ResultsWrap>> {
+        if (requestParameters.argTxId === null || requestParameters.argTxId === undefined) {
+            throw new runtime.RequiredError('argTxId','Required parameter requestParameters.argTxId was null or undefined when calling results.');
         }
 
         const queryParameters: runtime.HTTPQuery = {};
 
-        if (requestParameters.arg1 !== undefined) {
-            queryParameters['arg'] = requestParameters.arg1;
-        }
+        queryParameters['arg'] = requestParameters.argTxId;
 
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
-            path: `/supercontract/results`,
+            path: `/sc/results`,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
         });
 
-        return new runtime.JSONApiResponse<any>(response);
+        return new runtime.JSONApiResponse(response, (jsonValue) => ResultsWrapFromJSON(jsonValue));
     }
 
     /**
-     * Get results of a Supercontract by its ID.
-     * Results of a Supercontract
+     * Get results of a SuperContract execution by its TxID.
+     * Results of a SuperContract execution
      */
-    async results(requestParameters: ResultsRequest): Promise<Array<string>> {
+    async results(requestParameters: ResultsRequest): Promise<ResultsWrap> {
         const response = await this.resultsRaw(requestParameters);
         return await response.value();
     }

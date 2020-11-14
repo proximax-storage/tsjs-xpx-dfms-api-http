@@ -15,17 +15,26 @@
 
 import * as runtime from '../runtime';
 import {
-    ErrorDTO,
-    ErrorDTOFromJSON,
-    ErrorDTOToJSON,
+    AddrListWrap,
+    AddrListWrapFromJSON,
+    AddrListWrapToJSON,
+    ErrResult,
+    ErrResultFromJSON,
+    ErrResultToJSON,
+    PeerIdWrap,
+    PeerIdWrapFromJSON,
+    PeerIdWrapToJSON,
+    PeerListWrap,
+    PeerListWrapFromJSON,
+    PeerListWrapToJSON,
 } from '../models';
 
 export interface ConnectRequest {
-    arg2: string;
+    argAddr: string;
 }
 
 export interface DisconnectRequest {
-    arg2: string;
+    argAddr: string;
 }
 
 /**
@@ -34,10 +43,10 @@ export interface DisconnectRequest {
 export class NetworkApi extends runtime.BaseAPI {
 
     /**
-     * Get all node addresses.
+     * Get all addresses of a node.
      * Node addresses
      */
-    async addressesRaw(): Promise<runtime.ApiResponse<void>> {
+    async addressesRaw(): Promise<runtime.ApiResponse<AddrListWrap>> {
         const queryParameters: runtime.HTTPQuery = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -49,15 +58,16 @@ export class NetworkApi extends runtime.BaseAPI {
             query: queryParameters,
         });
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse(response, (jsonValue) => AddrListWrapFromJSON(jsonValue));
     }
 
     /**
-     * Get all node addresses.
+     * Get all addresses of a node.
      * Node addresses
      */
-    async addresses(): Promise<void> {
-        await this.addressesRaw();
+    async addresses(): Promise<AddrListWrap> {
+        const response = await this.addressesRaw();
+        return await response.value();
     }
 
     /**
@@ -65,15 +75,13 @@ export class NetworkApi extends runtime.BaseAPI {
      * Connect to a node
      */
     async connectRaw(requestParameters: ConnectRequest): Promise<runtime.ApiResponse<void>> {
-        if (requestParameters.arg2 === null || requestParameters.arg2 === undefined) {
-            throw new runtime.RequiredError('arg2','Required parameter requestParameters.arg2 was null or undefined when calling connect.');
+        if (requestParameters.argAddr === null || requestParameters.argAddr === undefined) {
+            throw new runtime.RequiredError('argAddr','Required parameter requestParameters.argAddr was null or undefined when calling connect.');
         }
 
         const queryParameters: runtime.HTTPQuery = {};
 
-        if (requestParameters.arg2 !== undefined) {
-            queryParameters['arg'] = requestParameters.arg2;
-        }
+        queryParameters['arg'] = requestParameters.argAddr;
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -96,19 +104,17 @@ export class NetworkApi extends runtime.BaseAPI {
     }
 
     /**
-     * Disconnect to a node by it address.
-     * Disconnect to a node
+     * Disconnect from a node by its address.
+     * Disconnect from a node
      */
     async disconnectRaw(requestParameters: DisconnectRequest): Promise<runtime.ApiResponse<void>> {
-        if (requestParameters.arg2 === null || requestParameters.arg2 === undefined) {
-            throw new runtime.RequiredError('arg2','Required parameter requestParameters.arg2 was null or undefined when calling disconnect.');
+        if (requestParameters.argAddr === null || requestParameters.argAddr === undefined) {
+            throw new runtime.RequiredError('argAddr','Required parameter requestParameters.argAddr was null or undefined when calling disconnect.');
         }
 
         const queryParameters: runtime.HTTPQuery = {};
 
-        if (requestParameters.arg2 !== undefined) {
-            queryParameters['arg'] = requestParameters.arg2;
-        }
+        queryParameters['arg'] = requestParameters.argAddr;
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -123,18 +129,18 @@ export class NetworkApi extends runtime.BaseAPI {
     }
 
     /**
-     * Disconnect to a node by it address.
-     * Disconnect to a node
+     * Disconnect from a node by its address.
+     * Disconnect from a node
      */
     async disconnect(requestParameters: DisconnectRequest): Promise<void> {
         await this.disconnectRaw(requestParameters);
     }
 
     /**
-     * Get ID of the node
+     * Get ID of a node
      * Get ID
      */
-    async getidRaw(): Promise<runtime.ApiResponse<void>> {
+    async getidRaw(): Promise<runtime.ApiResponse<PeerIdWrap>> {
         const queryParameters: runtime.HTTPQuery = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -146,22 +152,23 @@ export class NetworkApi extends runtime.BaseAPI {
             query: queryParameters,
         });
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse(response, (jsonValue) => PeerIdWrapFromJSON(jsonValue));
     }
 
     /**
-     * Get ID of the node
+     * Get ID of a node
      * Get ID
      */
-    async getid(): Promise<void> {
-        await this.getidRaw();
+    async getid(): Promise<PeerIdWrap> {
+        const response = await this.getidRaw();
+        return await response.value();
     }
 
     /**
      * Get all connected peers.
      * Connected peers
      */
-    async peersRaw(): Promise<runtime.ApiResponse<void>> {
+    async peersRaw(): Promise<runtime.ApiResponse<PeerListWrap>> {
         const queryParameters: runtime.HTTPQuery = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -173,15 +180,16 @@ export class NetworkApi extends runtime.BaseAPI {
             query: queryParameters,
         });
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse(response, (jsonValue) => PeerListWrapFromJSON(jsonValue));
     }
 
     /**
      * Get all connected peers.
      * Connected peers
      */
-    async peers(): Promise<void> {
-        await this.peersRaw();
+    async peers(): Promise<PeerListWrap> {
+        const response = await this.peersRaw();
+        return await response.value();
     }
 
 }

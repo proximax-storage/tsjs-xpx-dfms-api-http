@@ -14,72 +14,90 @@
 
 import { exists, mapValues } from '../runtime';
 /**
- * 
+ * Drive contract
  * @export
- * @interface InviteDTO
+ * @interface Contract
  */
-export interface InviteDTO {
+export interface Contract {
     /**
      * [Cid](https://github.com/multiformats/cid) (version 1) - special content identifier.
      * @type {string}
-     * @memberof InviteDTO
+     * @memberof Contract
      */
     drive?: string;
     /**
      * Hex encoded public key.
      * @type {string}
-     * @memberof InviteDTO
+     * @memberof Contract
      */
     owner?: string;
     /**
+     * Hex encoded public keys.
+     * @type {Array<string>}
+     * @memberof Contract
+     */
+    replicators?: Array<string>;
+    /**
+     * [Cid](https://github.com/multiformats/cid) (version 1) - special content identifier.
+     * @type {string}
+     * @memberof Contract
+     */
+    root?: string;
+    /**
+     * Block height when the Contract was started.
+     * @type {number}
+     * @memberof Contract
+     */
+    created?: number;
+    /**
      * 
      * @type {number}
-     * @memberof InviteDTO
+     * @memberof Contract
      */
     duration?: number;
     /**
      * 
      * @type {number}
-     * @memberof InviteDTO
+     * @memberof Contract
      */
     space?: number;
     /**
      * 
      * @type {number}
-     * @memberof InviteDTO
-     */
-    billingPrice?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof InviteDTO
-     */
-    billingPeriod?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof InviteDTO
+     * @memberof Contract
      */
     replicas?: number;
     /**
      * 
      * @type {number}
-     * @memberof InviteDTO
+     * @memberof Contract
      */
     minReplicators?: number;
     /**
      * 
      * @type {number}
-     * @memberof InviteDTO
+     * @memberof Contract
      */
     percentApprovers?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Contract
+     */
+    billingPrice?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Contract
+     */
+    billingPeriod?: number;
 }
 
-export function InviteDTOFromJSON(json: any): InviteDTO {
-    return InviteDTOFromJSONTyped(json, false);
+export function ContractFromJSON(json: any): Contract {
+    return ContractFromJSONTyped(json, false);
 }
 
-export function InviteDTOFromJSONTyped(json: any, ignoreDiscriminator: boolean): InviteDTO {
+export function ContractFromJSONTyped(json: any, ignoreDiscriminator: boolean): Contract {
     if ((json === undefined) || (json === null)) {
         return json;
     }
@@ -87,17 +105,20 @@ export function InviteDTOFromJSONTyped(json: any, ignoreDiscriminator: boolean):
         
         'drive': !exists(json, 'drive') ? undefined : json['drive'],
         'owner': !exists(json, 'owner') ? undefined : json['owner'],
+        'replicators': !exists(json, 'replicators') ? undefined : json['replicators'],
+        'root': !exists(json, 'root') ? undefined : json['root'],
+        'created': !exists(json, 'created') ? undefined : json['created'],
         'duration': !exists(json, 'duration') ? undefined : json['duration'],
         'space': !exists(json, 'space') ? undefined : json['space'],
-        'billingPrice': !exists(json, 'billingPrice') ? undefined : json['billingPrice'],
-        'billingPeriod': !exists(json, 'billingPeriod') ? undefined : json['billingPeriod'],
         'replicas': !exists(json, 'replicas') ? undefined : json['replicas'],
         'minReplicators': !exists(json, 'minReplicators') ? undefined : json['minReplicators'],
         'percentApprovers': !exists(json, 'percentApprovers') ? undefined : json['percentApprovers'],
+        'billingPrice': !exists(json, 'billingPrice') ? undefined : json['billingPrice'],
+        'billingPeriod': !exists(json, 'billingPeriod') ? undefined : json['billingPeriod'],
     };
 }
 
-export function InviteDTOToJSON(value?: InviteDTO | null): any {
+export function ContractToJSON(value?: Contract | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -108,13 +129,16 @@ export function InviteDTOToJSON(value?: InviteDTO | null): any {
         
         'drive': value.drive,
         'owner': value.owner,
+        'replicators': value.replicators,
+        'root': value.root,
+        'created': value.created,
         'duration': value.duration,
         'space': value.space,
-        'billingPrice': value.billingPrice,
-        'billingPeriod': value.billingPeriod,
         'replicas': value.replicas,
         'minReplicators': value.minReplicators,
         'percentApprovers': value.percentApprovers,
+        'billingPrice': value.billingPrice,
+        'billingPeriod': value.billingPeriod,
     };
 }
 

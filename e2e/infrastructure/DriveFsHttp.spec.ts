@@ -1,10 +1,9 @@
 import { deepEqual } from 'assert';
 import { assert, expect } from 'chai';
 import { DriveFsHttp } from '../../src/infrastructure/DriveFsHttp';
-import { TypeEnum } from '../../src/model/Stat';
 import { pack as tarpack, extract as tarextract } from 'tar-stream';
 import { createReadStream, createWriteStream } from 'fs';
-import { CidParam } from '../../src/infrastructure';
+import { Stat, StatTypeEnum } from '../../src/infrastructure';
 
 const fetchApi = require('node-fetch');
 const CID = require('cids');
@@ -15,8 +14,9 @@ const driveFsHttp = new DriveFsHttp({
     basePath: "http://127.0.0.1:6366/api/v1",
     fetchApi: fetchApi
 });
-const cid = 'baegbeibondkkrhxfprzwrlgxxltavqhweh2ylhu4hgo5lxjxpqbpfsw2lu';
-let helloWorldCid:CidParam = '';
+// const cid = 'baegbeibondkkrhxfprzwrlgxxltavqhweh2ylhu4hgo5lxjxpqbpfsw2lu';
+const cid = 'baegaajaiaqjcbg3doymeeul5vyrkyvf72w2nw2emb3jple6o5dl27lhjg4hrvukz';
+let helloWorldCid = '';
 
 describe('DriveFsHttp', () => {
     describe('cid', () => {
@@ -77,7 +77,7 @@ describe('DriveFsHttp', () => {
                 .subscribe((result) => {
                     expect(result.name).to.be.equal(path);
                     expect(result.size).not.to.be.undefined;
-                    expect(result.type).to.be.equal(TypeEnum.Dir)
+                    expect(result.type).to.be.equal(StatTypeEnum.Dir)
                     done();
                 });
         });
@@ -174,7 +174,7 @@ describe('DriveFsHttp', () => {
                     console.log("someRootDir:");
                     result.forEach(s => console.log(" -> " + s.name + " (size: " + s.size + ", type: " + s.type + ")"));
                     expect(result.length).to.be.equal(4);
-                    const sorted = result.sort((a, b) => (a.name < b.name ? -1 : (a.name > b.name ? 1 : 0)));
+                    const sorted = result.sort((a, b) => ((a.name as any) < (b.name as any) ? -1 : ((a.name as any) > (b.name as any) ? 1 : 0)));
                     expect(sorted[0].name).to.contain('folder');
                     expect(sorted[1].name).to.contain('newFile');
                     expect(sorted[2].name).to.contain('someDirRenamed');
@@ -189,7 +189,7 @@ describe('DriveFsHttp', () => {
                     console.log("someRootDir/folder:");
                     result.forEach(s => console.log(" -> " + s.name + " (size: " + s.size + ", type: " + s.type + ")"));
                     expect(result.length).to.be.equal(2);
-                    const sorted = result.sort((a, b) => (a.name < b.name ? -1 : (a.name > b.name ? 1 : 0)));
+                    const sorted = result.sort((a, b) => ((a.name as any) < (b.name as any) ? -1 : ((a.name as any) > (b.name as any) ? 1 : 0)));
                     expect(sorted[0].name).to.contain('newAnotherFile1');
                     expect(sorted[1].name).to.contain('newAnotherFile2');
                     done();
@@ -325,7 +325,7 @@ describe('DriveFsHttp', () => {
         */
     });
 
-    describe('rm', () => {
+    xdescribe('rm', () => {
         it('should delete a file/directory', (done) => {
             const path = 'someRootDir';
             driveFsHttp.rm(cid, path, false)
